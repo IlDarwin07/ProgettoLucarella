@@ -6,8 +6,12 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(120) NOT NULL,
   email VARCHAR(190) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
+  role ENUM('user','admin') NOT NULL DEFAULT 'user',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Aggiunge colonna role se la tabella esiste già (upgrade sicuro)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role ENUM('user','admin') NOT NULL DEFAULT 'user';
 
 CREATE TABLE IF NOT EXISTS reports (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -32,4 +36,18 @@ CREATE TABLE IF NOT EXISTS vault_items (
   notes TEXT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- =============================================
+-- UTENTE ADMIN ROOT
+-- email:    admin@fermi.it
+-- password: Admin@Fermi2025!
+-- (hash bcrypt generato con password_hash)
+-- =============================================
+INSERT IGNORE INTO users (name, email, password_hash, role)
+VALUES (
+  'Amministratore',
+  'admin@fermi.it',
+  '$2y$12$YzQ5NmE4OTViYTI2NzA5N.hF9wBkECgU1mIWrPCrRQqvPpHV7TBO2',
+  'admin'
 );
