@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeSchool Hub</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9;
+      --color-surface-offset: #f3f0ec; --color-divider: #dcd9d5; --color-border: #d4d1ca;
+      --color-text: #28251d; --color-text-muted: #7a7974; --color-text-faint: #bab9b4;
+      --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #cedcd8;
+      --color-error: #a12c7b; --color-success: #437a22; --color-warning: #964219; --color-orange: #da7101;
+      --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06); --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+      --shadow-lg: 0 12px 32px oklch(0.2 0.01 80 / 0.12);
+      --font-display: 'Cabinet Grotesk', 'Helvetica Neue', sans-serif;
+      --font-body: 'Satoshi', 'Inter', sans-serif;
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+      --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+      --space-12: 3rem; --space-16: 4rem;
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
+      --color-surface-offset: #1d1c1a; --color-divider: #262523; --color-border: #393836;
+      --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
+      --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-highlight: #313b3b;
+      --color-success: #6daa45; --color-error: #d163a7; --color-warning: #bb653b; --color-orange: #fdab43;
+      --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2); --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
+      --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.4);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+    body { min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); color: var(--color-text); background: var(--color-bg); transition: background var(--transition), color var(--transition); }
+    img, svg { display: block; max-width: 100%; }
+    button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+    input, textarea, select { font: inherit; color: inherit; }
+    a { color: inherit; text-decoration: none; }
+    h1,h2,h3,h4 { font-family: var(--font-display); line-height: 1.1; text-wrap: balance; }
+    :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
+    .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100dvh; }
+    @media (max-width: 768px) { .app { grid-template-columns: 1fr; } }
+    .sidebar { background: var(--color-surface); border-right: 1px solid var(--color-divider); display: flex; flex-direction: column; padding: var(--space-6) var(--space-4); position: sticky; top: 0; height: 100dvh; overflow-y: auto; }
+    @media (max-width: 768px) { .sidebar { display: none; } }
+    .logo { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-8); }
+    .logo-icon { width: 36px; height: 36px; background: var(--color-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-icon svg { color: white; }
+    .logo-name { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 800; color: var(--color-text); }
+    .logo-name span { color: var(--color-primary); }
+    .nav-label { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-faint); margin-bottom: var(--space-2); padding-left: var(--space-3); }
+    .nav-group { margin-bottom: var(--space-6); }
+    .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; color: var(--color-text-muted); cursor: pointer; transition: all var(--transition); margin-bottom: 2px; }
+    .nav-item:hover { background: var(--color-surface-offset); color: var(--color-text); }
+    .nav-item.active { background: var(--color-primary-highlight); color: var(--color-primary); font-weight: 700; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .sidebar-footer { margin-top: auto; padding-top: var(--space-6); border-top: 1px solid var(--color-divider); }
+    .theme-btn { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--color-text-muted); width: 100%; transition: all var(--transition); }
+    .theme-btn:hover { background: var(--color-surface-offset); color: var(--color-text); }
+    .theme-btn svg { width: 18px; height: 18px; }
+    .main { overflow: auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-8); border-bottom: 1px solid var(--color-divider); background: var(--color-surface); position: sticky; top: 0; z-index: 10; }
+    @media (max-width: 768px) { .topbar { padding: var(--space-4); } }
+    .topbar-left { display: flex; align-items: center; gap: var(--space-4); }
+    .mobile-logo { display: none; font-family: var(--font-display); font-weight: 800; font-size: var(--text-lg); }
+    .mobile-logo span { color: var(--color-primary); }
+    @media (max-width: 768px) { .mobile-logo { display: block; } }
+    .page-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 800; }
+    .topbar-right { display: flex; align-items: center; gap: var(--space-3); }
+    .avatar { width: 36px; height: 36px; border-radius: var(--radius-full); background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--text-sm); }
+    .icon-btn { width: 36px; height: 36px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); transition: all var(--transition); }
+    .icon-btn:hover { background: var(--color-surface-offset); color: var(--color-text); }
+    .icon-btn svg { width: 18px; height: 18px; }
+    .content { padding: var(--space-8); max-width: 1100px; }
+    @media (max-width: 768px) { .content { padding: var(--space-4); } }
+    .section { display: none; }
+    .section.active { display: block; }
+    .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6); box-shadow: var(--shadow-sm); }
+    .card-title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--space-4); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-8); }
+    .kpi { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-5); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: var(--space-2); }
+    .kpi-label { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--color-text-muted); }
+    .kpi-value { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; line-height: 1; }
+    .kpi-sub { font-size: var(--text-xs); color: var(--color-text-faint); }
+    .kpi-icon { width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-1); }
+    .kpi-icon svg { width: 16px; height: 16px; }
+    .kpi-green .kpi-icon { background: color-mix(in oklch, var(--color-success) 15%, var(--color-surface)); color: var(--color-success); }
+    .kpi-teal .kpi-icon { background: var(--color-primary-highlight); color: var(--color-primary); }
+    .kpi-orange .kpi-icon { background: color-mix(in oklch, var(--color-orange) 15%, var(--color-surface)); color: var(--color-orange); }
+    .kpi-red .kpi-icon { background: color-mix(in oklch, var(--color-error) 12%, var(--color-surface)); color: var(--color-error); }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+    @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
+    .dashboard-grid .card.span-2 { grid-column: span 2; }
+    @media (max-width: 900px) { .dashboard-grid .card.span-2 { grid-column: span 1; } }
+    .btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-5); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 600; transition: all var(--transition); cursor: pointer; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { background: var(--color-primary); color: white; }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-ghost { background: transparent; color: var(--color-text-muted); border: 1px solid var(--color-border); }
+    .btn-ghost:hover { background: var(--color-surface-offset); color: var(--color-text); }
+    .form-group { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-4); }
+    .form-label { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); }
+    .form-input, .form-select, .form-textarea { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface-2); font-size: var(--text-sm); color: var(--color-text); transition: border-color var(--transition), box-shadow var(--transition); width: 100%; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 20%, transparent); }
+    .form-textarea { resize: vertical; min-height: 100px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    .badge { display: inline-flex; align-items: center; padding: 2px var(--space-2); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700; }
+    .badge-alta { background: color-mix(in oklch, var(--color-error) 15%, var(--color-surface)); color: var(--color-error); }
+    .badge-media { background: color-mix(in oklch, var(--color-orange) 15%, var(--color-surface)); color: var(--color-orange); }
+    .badge-bassa { background: color-mix(in oklch, var(--color-success) 15%, var(--color-surface)); color: var(--color-success); }
+    .badge-aperta { background: var(--color-primary-highlight); color: var(--color-primary); }
+    .badge-risolta { background: color-mix(in oklch, var(--color-success) 15%, var(--color-surface)); color: var(--color-success); }
+    .segnalazione-list { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-6); }
+    .segnalazione-item { background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); display: grid; grid-template-columns: 1fr auto; gap: var(--space-2); }
+    .seg-header { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-1); }
+    .seg-title { font-weight: 700; font-size: var(--text-sm); }
+    .seg-body { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .seg-meta { font-size: var(--text-xs); color: var(--color-text-faint); margin-top: var(--space-1); }
+    .seg-codice { font-family: monospace; font-size: var(--text-xs); background: var(--color-surface-offset); padding: 2px var(--space-2); border-radius: var(--radius-sm); color: var(--color-text-muted); }
+    .risorse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); }
+    .risorsa-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-5); box-shadow: var(--shadow-sm); transition: box-shadow var(--transition), transform var(--transition); cursor: pointer; }
+    .risorsa-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .risorsa-icon { width: 44px; height: 44px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-3); }
+    .risorsa-icon svg { width: 22px; height: 22px; }
+    .risorsa-title { font-family: var(--font-display); font-weight: 700; font-size: var(--text-base); margin-bottom: var(--space-1); }
+    .risorsa-desc { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.5; }
+    .risorsa-tag { display: inline-block; margin-top: var(--space-2); font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-faint); }
+    .checklist { display: flex; flex-direction: column; gap: var(--space-3); }
+    .check-item { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); transition: background var(--transition); cursor: pointer; }
+    .check-item.checked { background: color-mix(in oklch, var(--color-success) 8%, var(--color-surface)); border-color: color-mix(in oklch, var(--color-success) 30%, var(--color-border)); }
+    .check-box { width: 22px; height: 22px; border-radius: var(--radius-sm); border: 2px solid var(--color-border); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+    .check-item.checked .check-box { background: var(--color-success); border-color: var(--color-success); }
+    .check-box svg { width: 14px; height: 14px; color: white; display: none; }
+    .check-item.checked .check-box svg { display: block; }
+    .check-content { flex: 1; }
+    .check-title { font-weight: 600; font-size: var(--text-sm); margin-bottom: 2px; }
+    .check-desc { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .alert { padding: var(--space-4); border-radius: var(--radius-lg); margin-bottom: var(--space-4); display: flex; align-items: flex-start; gap: var(--space-3); }
+    .alert-info { background: var(--color-primary-highlight); color: var(--color-primary-hover); }
+    .alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+    .alert-text { font-size: var(--text-sm); }
+    .alert-title { font-weight: 700; margin-bottom: 2px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-4); }
+    .section-header-left h2 { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 800; }
+    .section-header-left p { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-1); }
+    .divider { height: 1px; background: var(--color-divider); margin: var(--space-6) 0; }
+    .modal-overlay { position: fixed; inset: 0; background: oklch(0.1 0.01 80 / 0.5); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); padding: var(--space-4); opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal { background: var(--color-surface); border-radius: var(--radius-xl); padding: var(--space-8); max-width: 540px; width: 100%; box-shadow: var(--shadow-lg); transform: translateY(12px); transition: transform var(--transition); }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
+    .modal-title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 800; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-6); }
+    .toast-container { position: fixed; bottom: var(--space-6); right: var(--space-6); display: flex; flex-direction: column; gap: var(--space-2); z-index: 200; }
+    .toast { background: var(--color-text); color: var(--color-bg); padding: var(--space-3) var(--space-5); border-radius: var(--radius-lg); font-size: var(--text-sm); font-weight: 500; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: var(--space-2); animation: slideIn 0.3s cubic-bezier(0.16,1,0.3,1); }
+    .toast svg { width: 16px; height: 16px; }
+    @keyframes slideIn { from { opacity:0; transform: translateX(24px); } to { opacity:1; transform: translateX(0); } }
+    .progress-bar { height: 6px; background: var(--color-divider); border-radius: var(--radius-full); overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--color-primary); border-radius: var(--radius-full); transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+    .empty-state { display: flex; flex-direction: column; align-items: center; text-align: center; padding: var(--space-16) var(--space-8); color: var(--color-text-muted); }
+    .empty-state svg { width: 48px; height: 48px; color: var(--color-text-faint); margin-bottom: var(--space-4); }
+    .empty-state h3 { font-family: var(--font-display); color: var(--color-text); margin-bottom: var(--space-2); }
+    .empty-state p { font-size: var(--text-sm); max-width: 36ch; margin-bottom: var(--space-6); }
+    .stat-row { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-divider); }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .stat-value { font-weight: 700; font-size: var(--text-sm); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span class="logo-name">Safe<span>School</span> Hub</span>
+    </div>
+    <nav>
+      <div class="nav-group">
+        <div class="nav-label">Menu principale</div>
+        <div class="nav-item active" data-section="dashboard" onclick="goTo('dashboard')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </div>
+        <div class="nav-item" data-section="segnalazioni" onclick="goTo('segnalazioni')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Segnalazioni
+        </div>
+        <div class="nav-item" data-section="risorse" onclick="goTo('risorse')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Risorse
+        </div>
+        <div class="nav-item" data-section="privacy" onclick="goTo('privacy')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Privacy Digitale
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Admin</div>
+        <div class="nav-item" data-section="admin" onclick="goTo('admin')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Pannello Admin
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Cambia tema
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="mobile-logo">Safe<span>School</span> Hub</div>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <div class="avatar">DS</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div id="dashboard" class="section active">
+        <div class="kpi-grid">
+          <div class="kpi kpi-teal">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div>
+            <div class="kpi-label">Segnalazioni totali</div>
+            <div class="kpi-value" id="kpiTot">0</div>
+            <div class="kpi-sub">nel mese corrente</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <div class="kpi-label">Aperte</div>
+            <div class="kpi-value" id="kpiAperte">0</div>
+            <div class="kpi-sub">in attesa di risposta</div>
+          </div>
+          <div class="kpi kpi-green">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="kpi-label">Risolte</div>
+            <div class="kpi-value" id="kpiRisolte">0</div>
+            <div class="kpi-sub">chiuse con successo</div>
+          </div>
+          <div class="kpi kpi-red">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="kpi-label">Privacy Check</div>
+            <div class="kpi-value" id="kpiPrivacy">0%</div>
+            <div class="kpi-sub">completamento checklist</div>
+          </div>
+        </div>
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-title">Segnalazioni recenti</div>
+            <div id="dashRecenti"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Categorie più segnalate</div>
+            <div id="dashCategorie"></div>
+          </div>
+          <div class="card span-2">
+            <div class="card-title">A proposito di SafeSchool Hub</div>
+            <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.7;max-width:72ch">SafeSchool Hub è una piattaforma web sviluppata per il contesto scolastico dell'ITT Enrico Fermi di Francavilla Fontana. Permette a studenti e docenti di segnalare problemi, consultare risorse didattiche e formarsi sulla privacy digitale e sulla sicurezza in rete.</p>
+            <div class="divider"></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-4)">
+              <div><div style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-faint);margin-bottom:var(--space-1)">Sviluppato da</div><div style="font-size:var(--text-sm);font-weight:600">Daniele Signorile</div></div>
+              <div><div style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-faint);margin-bottom:var(--space-1)">Istituto</div><div style="font-size:var(--text-sm);font-weight:600">ITT Enrico Fermi</div></div>
+              <div><div style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-faint);margin-bottom:var(--space-1)">Anno</div><div style="font-size:var(--text-sm);font-weight:600">2025/2026</div></div>
+              <div><div style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-text-faint);margin-bottom:var(--space-1)">Indirizzo</div><div style="font-size:var(--text-sm);font-weight:600">Informatica e Telecom.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEGNALAZIONI -->
+      <div id="segnalazioni" class="section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <h2>Segnalazioni</h2>
+            <p>Invia una segnalazione e monitora il suo stato tramite il codice univoco</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuova segnalazione
+          </button>
+        </div>
+        <div class="alert alert-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="alert-text"><div class="alert-title">Come funziona</div>Dopo aver inviato una segnalazione riceverai un codice univoco. Conservalo per tracciare lo stato della tua richiesta.</div>
+        </div>
+        <div id="segList" class="segnalazione-list"></div>
+      </div>
+
+      <!-- RISORSE -->
+      <div id="risorse" class="section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <h2>Risorse</h2>
+            <p>Materiali utili per studenti e docenti dell'ITT Enrico Fermi</p>
+          </div>
+        </div>
+        <div class="risorse-grid">
+          <div class="risorsa-card"><div class="risorsa-icon" style="background:var(--color-primary-highlight);color:var(--color-primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="risorsa-title">Guida alla sicurezza online</div><div class="risorsa-desc">Come proteggere i tuoi dati, riconoscere il phishing e navigare in modo sicuro.</div><div class="risorsa-tag">Sicurezza</div></div>
+          <div class="risorsa-card"><div class="risorsa-icon" style="background:color-mix(in oklch,var(--color-orange) 15%,var(--color-surface));color:var(--color-orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="risorsa-title">Netiquette scolastica</div><div class="risorsa-desc">Le regole del comportamento digitale responsabile in ambito scolastico.</div><div class="risorsa-tag">Regolamento</div></div>
+          <div class="risorsa-card"><div class="risorsa-icon" style="background:color-mix(in oklch,var(--color-success) 15%,var(--color-surface));color:var(--color-success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div class="risorsa-title">Materiali di informatica</div><div class="risorsa-desc">Appunti, schemi e guide pratiche per il percorso di Informatica e Telecomunicazioni.</div><div class="risorsa-tag">Didattica</div></div>
+          <div class="risorsa-card"><div class="risorsa-icon" style="background:color-mix(in oklch,var(--color-error) 12%,var(--color-surface));color:var(--color-error)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="risorsa-title">Procedure di emergenza</div><div class="risorsa-desc">Come comportarsi in caso di incidente informatico, data breach o uso improprio dei sistemi.</div><div class="risorsa-tag">Emergenza</div></div>
+          <div class="risorsa-card"><div class="risorsa-icon" style="background:color-mix(in oklch,var(--color-primary) 12%,var(--color-surface));color:var(--color-primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="risorsa-title">Diritti degli studenti</div><div class="risorsa-desc">Cosa dice il GDPR sui dati degli studenti e quali sono i tuoi diritti digitali a scuola.</div><div class="risorsa-tag">GDPR</div></div>
+          <div class="risorsa-card"><div class="risorsa-icon" style="background:color-mix(in oklch,#d19900 15%,var(--color-surface));color:#d19900"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="risorsa-title">Borsa di Studio Lucarella</div><div class="risorsa-desc">Informazioni sul bando, requisiti e scadenze per la borsa "prof. Stefano Lucarella" a.s. 2025/2026.</div><div class="risorsa-tag">Borse di studio</div></div>
+        </div>
+      </div>
+
+      <!-- PRIVACY -->
+      <div id="privacy" class="section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <h2>Privacy Digitale</h2>
+            <p>Checklist e consigli per un uso consapevole e sicuro del digitale a scuola</p>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:var(--space-6)">
+          <div class="card-title">Il tuo punteggio di sicurezza</div>
+          <div style="display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-3)">
+            <div style="font-family:var(--font-display);font-size:var(--text-2xl);font-weight:800;color:var(--color-primary)" id="privacyScore">0%</div>
+            <div style="flex:1"><div class="progress-bar"><div class="progress-fill" id="privacyBar" style="width:0%"></div></div></div>
+          </div>
+          <div style="font-size:var(--text-sm);color:var(--color-text-muted)" id="privacyMsg">Inizia a completare la checklist qui sotto.</div>
+        </div>
+        <div class="checklist" id="checklistContainer"></div>
+      </div>
+
+      <!-- ADMIN -->
+      <div id="admin" class="section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <h2>Pannello Admin</h2>
+            <p>Gestione delle segnalazioni e stato del sistema</p>
+          </div>
+        </div>
+        <div class="dashboard-grid">
+          <div class="card"><div class="card-title">Statistiche sistema</div><div id="adminStats"></div></div>
+          <div class="card"><div class="card-title">Segnalazioni da gestire</div><div id="adminList"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nuova Segnalazione</div>
+      <button class="icon-btn" onclick="closeModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <form id="segForm" onsubmit="submitSegnalazione(event)">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label" for="segNome">Nome / Classe</label><input class="form-input" type="text" id="segNome" placeholder="Es. 5A Informatica" required /></div>
+        <div class="form-group"><label class="form-label" for="segCategoria">Categoria</label><select class="form-select" id="segCategoria" required><option value="">Seleziona...</option><option>Problema tecnico</option><option>Privacy / Dati personali</option><option>Comportamento scorretto online</option><option>Richiesta materiali</option><option>Sicurezza rete scolastica</option><option>Altro</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="segTitolo">Titolo</label><input class="form-input" type="text" id="segTitolo" placeholder="Breve descrizione del problema" required /></div>
+      <div class="form-group"><label class="form-label" for="segDesc">Descrizione</label><textarea class="form-textarea" id="segDesc" placeholder="Descrivi il problema in dettaglio..." required></textarea></div>
+      <div class="form-group"><label class="form-label" for="segPriorita">Priorità</label><select class="form-select" id="segPriorita" required><option value="">Seleziona...</option><option value="Alta">Alta - urgente</option><option value="Media">Media</option><option value="Bassa">Bassa</option></select></div>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal()">Annulla</button><button type="submit" class="btn btn-primary">Invia segnalazione</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  let segnalazioni = [
+    { id: 'SS-001', nome: 'Prof. Rossi', categoria: 'Problema tecnico', titolo: 'PC laboratorio non funziona', desc: 'Il PC alla postazione 7 del laboratorio di informatica non si avvia.', priorita: 'Alta', stato: 'aperta', data: '2026-05-18' },
+    { id: 'SS-002', nome: 'Classe 4B', categoria: 'Sicurezza rete scolastica', titolo: 'WiFi lento in classe', desc: 'La rete WiFi in aula 12 è molto lenta durante le ore di lezione.', priorita: 'Media', stato: 'aperta', data: '2026-05-19' },
+    { id: 'SS-003', nome: 'Mario V.', categoria: 'Privacy / Dati personali', titolo: 'Dati condivisi senza consenso', desc: "Un'app usata a scuola condivide dati senza consenso esplicito.", priorita: 'Alta', stato: 'risolta', data: '2026-05-15' },
+  ];
+  const checklist = [
+    { id: 'c1', titolo: 'Password sicura', desc: 'Usa una password di almeno 12 caratteri con lettere, numeri e simboli per ogni account scolastico.', checked: false },
+    { id: 'c2', titolo: 'Autenticazione a due fattori', desc: "Attiva la verifica in due passaggi sulla tua email scolastica e sugli account principali.", checked: false },
+    { id: 'c3', titolo: 'Niente dati personali in chat', desc: 'Non condividere codice fiscale, indirizzo o documenti su WhatsApp, Telegram o chat di classe.', checked: false },
+    { id: 'c4', titolo: 'Controlla le app che usi', desc: 'Verifica le app scolastiche che usi e le autorizzazioni che richiedono (microfono, fotocamera, posizione).', checked: false },
+    { id: 'c5', titolo: 'Logout dopo ogni sessione', desc: 'Esegui sempre il logout dai computer della scuola e dai registri elettronici dopo l utilizzo.', checked: false },
+    { id: 'c6', titolo: 'Riconosci il phishing', desc: 'Sai riconoscere una email di phishing? Non cliccare link sospetti, anche se sembrano ufficiali.', checked: false },
+    { id: 'c7', titolo: 'Backup dei dati importanti', desc: 'Tieni una copia dei tuoi elaborati e progetti su cloud o dispositivo personale.', checked: false },
+    { id: 'c8', titolo: 'Privacy sui social', desc: 'Controlla le impostazioni di privacy dei tuoi profili social e non condividere informazioni sulla tua scuola pubblicamente.', checked: false },
+  ];
+  const pageTitles = { dashboard: 'Dashboard', segnalazioni: 'Segnalazioni', risorse: 'Risorse', privacy: 'Privacy Digitale', admin: 'Pannello Admin' };
+  function goTo(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item[data-section="' + id + '"]').forEach(n => n.classList.add('active'));
+    document.getElementById('pageTitle').textContent = pageTitles[id];
+    if (id === 'dashboard') renderDashboard();
+    if (id === 'segnalazioni') renderSegnalazioni();
+    if (id === 'admin') renderAdmin();
+    if (id === 'privacy') renderPrivacy();
+  }
+  function toggleTheme() {
+    const html = document.documentElement;
+    const t = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', t);
+  }
+  function openModal() { document.getElementById('modalOverlay').classList.add('open'); }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.getElementById('segForm').reset(); }
+  function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+  function showToast(msg, icon) {
+    const t = document.createElement('div'); t.className = 'toast';
+    t.innerHTML = (icon || '') + '<span>' + msg + '</span>';
+    document.getElementById('toastContainer').appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+  function genCodice() { return 'SS-' + Math.random().toString(36).substr(2, 5).toUpperCase(); }
+  function submitSegnalazione(e) {
+    e.preventDefault();
+    const codice = genCodice();
+    segnalazioni.unshift({ id: codice, nome: document.getElementById('segNome').value, categoria: document.getElementById('segCategoria').value, titolo: document.getElementById('segTitolo').value, desc: document.getElementById('segDesc').value, priorita: document.getElementById('segPriorita').value, stato: 'aperta', data: new Date().toISOString().split('T')[0] });
+    closeModal(); renderSegnalazioni(); updateKPI();
+    showToast('Segnalazione inviata! Codice: ' + codice, '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>');
+  }
+  function renderSegnalazioni() {
+    const c = document.getElementById('segList');
+    if (!segnalazioni.length) { c.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg><h3>Nessuna segnalazione</h3><p>Invia la prima segnalazione usando il pulsante in alto.</p></div>'; return; }
+    c.innerHTML = segnalazioni.map(s => '<div class="segnalazione-item"><div><div class="seg-header"><span class="seg-codice">' + s.id + '</span><span class="badge badge-' + s.priorita.toLowerCase() + '">' + s.priorita + '</span><span class="badge badge-' + s.stato + '">' + s.stato.charAt(0).toUpperCase() + s.stato.slice(1) + '</span></div><div class="seg-title">' + s.titolo + '</div><div class="seg-body">' + s.desc + '</div><div class="seg-meta">' + s.categoria + ' · ' + s.nome + ' · ' + s.data + '</div></div>' + (s.stato === 'aperta' ? '<button class="btn btn-ghost" style="align-self:start;white-space:nowrap" onclick="risolvi(\'' + s.id + '\')">Segna risolta</button>' : '') + '</div>').join('');
+  }
+  function risolvi(id) {
+    const s = segnalazioni.find(x => x.id === id);
+    if (s) { s.stato = 'risolta'; renderSegnalazioni(); updateKPI(); showToast('Segnalazione ' + id + ' risolta!'); }
+  }
+  function renderDashboard() {
+    updateKPI();
+    const recenti = segnalazioni.slice(0, 3);
+    document.getElementById('dashRecenti').innerHTML = recenti.length ? recenti.map(s => '<div class="stat-row"><div><div style="font-weight:600;font-size:var(--text-sm)">' + s.titolo + '</div><div style="font-size:var(--text-xs);color:var(--color-text-faint)">' + s.data + ' · ' + s.categoria + '</div></div><span class="badge badge-' + s.stato + '">' + s.stato + '</span></div>').join('') : '<div class="empty-state" style="padding:var(--space-8)"><p>Nessuna segnalazione ancora.</p></div>';
+    const cat = {}; segnalazioni.forEach(s => { cat[s.categoria] = (cat[s.categoria] || 0) + 1; });
+    const sorted = Object.entries(cat).sort((a,b) => b[1]-a[1]).slice(0,5);
+    document.getElementById('dashCategorie').innerHTML = sorted.length ? sorted.map(([k,v]) => '<div class="stat-row"><div class="stat-label">' + k + '</div><div class="stat-value">' + v + '</div></div>').join('') : '<p style="font-size:var(--text-sm);color:var(--color-text-muted)">Nessun dato.</p>';
+  }
+  function updateKPI() {
+    document.getElementById('kpiTot').textContent = segnalazioni.length;
+    document.getElementById('kpiAperte').textContent = segnalazioni.filter(s => s.stato === 'aperta').length;
+    document.getElementById('kpiRisolte').textContent = segnalazioni.filter(s => s.stato === 'risolta').length;
+    const pct = checklist.filter(c => c.checked).length / checklist.length * 100;
+    document.getElementById('kpiPrivacy').textContent = Math.round(pct) + '%';
+  }
+  function renderPrivacy() {
+    const c = document.getElementById('checklistContainer');
+    c.innerHTML = checklist.map(item => '<div class="check-item ' + (item.checked ? 'checked' : '') + '" id="ci-' + item.id + '" onclick="toggleCheck(\'' + item.id + '\')"><div class="check-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:' + (item.checked ? 'block' : 'none') + '"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-content"><div class="check-title">' + item.titolo + '</div><div class="check-desc">' + item.desc + '</div></div></div>').join('');
+    updatePrivacyScore();
+  }
+  function toggleCheck(id) {
+    const item = checklist.find(c => c.id === id);
+    if (item) {
+      item.checked = !item.checked;
+      document.getElementById('ci-' + id).classList.toggle('checked', item.checked);
+      const svg = document.getElementById('ci-' + id).querySelector('.check-box svg');
+      if (svg) svg.style.display = item.checked ? 'block' : 'none';
+      updatePrivacyScore(); updateKPI();
+    }
+  }
+  function updatePrivacyScore() {
+    const done = checklist.filter(c => c.checked).length;
+    const pct = Math.round(done / checklist.length * 100);
+    document.getElementById('privacyScore').textContent = pct + '%';
+    document.getElementById('privacyBar').style.width = pct + '%';
+    const msgs = ['Inizia a completare la checklist qui sotto.','Stai facendo progressi, continua!','Più della metà completata, ottimo lavoro!','Quasi al sicuro, ancora un po!','Perfetto! Segui tutte le best practice di sicurezza digitale!'];
+    document.getElementById('privacyMsg').textContent = msgs[Math.floor(pct / 25)];
+  }
+  function renderAdmin() {
+    document.getElementById('adminStats').innerHTML = [['Totale segnalazioni', segnalazioni.length],['Aperte', segnalazioni.filter(s => s.stato === 'aperta').length],['Risolte', segnalazioni.filter(s => s.stato === 'risolta').length],['Priorità Alta', segnalazioni.filter(s => s.priorita === 'Alta').length],['Checklist privacy', checklist.filter(c => c.checked).length + ' / ' + checklist.length]].map(([l,v]) => '<div class="stat-row"><div class="stat-label">' + l + '</div><div class="stat-value">' + v + '</div></div>').join('');
+    const aperte = segnalazioni.filter(s => s.stato === 'aperta');
+    document.getElementById('adminList').innerHTML = aperte.length ? aperte.map(s => '<div class="stat-row"><div><div style="font-weight:600;font-size:var(--text-sm)">' + s.titolo + '</div><div style="font-size:var(--text-xs);color:var(--color-text-faint)">' + s.nome + ' · ' + s.data + '</div></div><span class="badge badge-' + s.priorita.toLowerCase() + '">' + s.priorita + '</span></div>').join('') : '<p style="font-size:var(--text-sm);color:var(--color-text-muted);padding:var(--space-4) 0">Nessuna segnalazione aperta!</p>';
+  }
+  renderDashboard();
+  renderPrivacy();
+</script>
+</body>
+</html>
