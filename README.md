@@ -22,26 +22,27 @@ SafeSchool Hub è una piattaforma web che nasce per rispondere a un'esigenza rea
 ### Tecnologie utilizzate
 
 - HTML5 semantico
-- CSS3 con design system completo (token, dark mode, responsive)
-- JavaScript vanilla — zero dipendenze
+- CSS3 (design system con variabili, dark mode, responsive mobile-first)
+- JavaScript Vanilla (zero dipendenze)
 - Font: Cabinet Grotesk + Satoshi (Fontshare CDN)
 
 ### Come avviare
 
-Apri il file `index.html` nel browser. Nessun server richiesto — funziona direttamente come file statico.
+Apri `index.html` nel browser. Nessun server richiesto.
 
 ---
 
-## Borsa di Studio "prof. Stefano Lucarella"
+## Borsa di Studio "prof. Stefano Lucarella" — a.s. 2025/2026
 
-Questo progetto è stato sviluppato come elaborato originale per partecipare alla Borsa di Studio "prof. Stefano Lucarella" — a.s. 2025/2026 — ITT Enrico Fermi, Francavilla Fontana.
+Questo progetto è l'elaborato originale presentato per la Borsa di Studio "prof. Stefano Lucarella" presso l'ITT Enrico Fermi di Francavilla Fontana (BR).
 
-**Criteri rispettati:**
-- Originalità e qualità del progetto
-- Coerenza con il percorso di studi (Informatica e Telecomunicazioni)
-- Utilità concreta per la comunità scolastica dell'ITT Enrico Fermi
-- Chiarezza espositiva e completezza della documentazione
+**Criteri rispettati dal progetto:**
+- ✅ Originalità — piattaforma ideata e sviluppata da zero
+- ✅ Qualità tecnica — HTML5 semantico, CSS design system, JS vanilla
+- ✅ Coerenza col percorso — Informatica e Telecomunicazioni
+- ✅ Utilità concreta — risponde a un bisogno reale della scuola
+- ✅ Chiarezza espositiva — documentazione completa
 
 ---
 
-*© 2026 Daniele Signorile — ITT Enrico Fermi*
+*© 2026 Daniele Signorile — ITT Enrico Fermi, Francavilla Fontana*
