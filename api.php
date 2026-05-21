@@ -26,7 +26,6 @@ switch ($action) {
         if (!$u || !password_verify($password, $u['password_hash'])) {
             echo json_encode(['ok' => false, 'message' => 'Credenziali non valide']); exit;
         }
-        // Rehash automatico se il cost è cambiato
         if (password_needs_rehash($u['password_hash'], PASSWORD_BCRYPT, ['cost' => 12])) {
             $newHash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
             $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([$newHash, $u['id']]);
@@ -110,6 +109,16 @@ switch ($action) {
         echo json_encode(['ok' => true]);
         break;
 
+    /* -------- REPORT DELETE (admin) -------- */
+    case 'delete_report':
+        if (($_SESSION['user']['role'] ?? '') !== 'admin') {
+            echo json_encode(['ok' => false, 'message' => 'Non autorizzato']); exit;
+        }
+        $d = json_decode(file_get_contents('php://input'), true);
+        $pdo->prepare('DELETE FROM reports WHERE id = ?')->execute([$d['id']]);
+        echo json_encode(['ok' => true]);
+        break;
+
     /* -------- ADMIN REPORTS -------- */
     case 'admin_reports':
         if (($_SESSION['user']['role'] ?? '') !== 'admin') {
@@ -154,6 +163,27 @@ switch ($action) {
         $pdo->prepare('DELETE FROM vault_items WHERE id = ? AND user_id = ?')
             ->execute([$d['id'], $uid]);
         echo json_encode(['ok' => true]);
+        break;
+
+    /* -------- GENERATE PASSWORD -------- */
+    case 'generate_password':
+        $mode = $_GET['mode'] ?? 'random';
+        if ($mode === 'phrase') {
+            $words = ['Scuola','Fermi','Foggia','Laptop','Tastiera','Monitor','Python','Linux',
+                      'Sicuro','Verde','Rapido','Forte','Cielo','Torre','Nuvola','Ponte',
+                      'Stella','Libro','Codice','Pixel'];
+            shuffle($words);
+            $phrase = implode('-', array_slice($words, 0, 4)) . rand(10,99);
+            echo json_encode(['ok' => true, 'password' => $phrase]);
+        } else {
+            $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+            $len = 18;
+            $pw = '';
+            for ($i = 0; $i < $len; $i++) {
+                $pw .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+            echo json_encode(['ok' => true, 'password' => $pw]);
+        }
         break;
 
     default:
