@@ -1,3 +1,6 @@
+-- SafeSchool Hub — schema completo (ricostruito)
+-- root@itisff.it / admin1234  →  bcrypt cost=12
+
 DROP DATABASE IF EXISTS safeschool_hub;
 CREATE DATABASE safeschool_hub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE safeschool_hub;
@@ -36,7 +39,9 @@ CREATE TABLE vault_items (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- root@itisff.it / admin1234  (bcrypt cost=12)
+-- Utente root predefinito
+-- password: admin1234  →  bcrypt cost=12
+-- Rigenera con: php -r "echo password_hash('admin1234', PASSWORD_BCRYPT, ['cost'=>12]);"
 INSERT INTO users (name, email, password_hash, role) VALUES (
   'Root Administrator',
   'root@itisff.it',
