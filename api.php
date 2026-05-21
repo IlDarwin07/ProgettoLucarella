@@ -1,9 +1,24 @@
 <?php
-require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/auth.php';
 
 header('Content-Type: application/json');
 $action = $_GET['action'] ?? '';
+
+// Chiave AES per cifratura vault (in produzione usare variabile d'ambiente)
+define('VAULT_KEY', hash('sha256', 'safeschool_vault_secret_key', true));
+
+function vault_encrypt(string $plain): string {
+    $iv = random_bytes(16);
+    $enc = openssl_encrypt($plain, 'AES-256-CBC', VAULT_KEY, OPENSSL_RAW_DATA, $iv);
+    return base64_encode($iv . $enc);
+}
+
+function vault_decrypt(string $enc): string {
+    $raw = base64_decode($enc);
+    $iv  = substr($raw, 0, 16);
+    $ct  = substr($raw, 16);
+    return openssl_decrypt($ct, 'AES-256-CBC', VAULT_KEY, OPENSSL_RAW_DATA, $iv);
+}
 
 switch ($action) {
 
@@ -101,6 +116,7 @@ switch ($action) {
     /* -------- REPORT STATUS UPDATE (admin) -------- */
     case 'report_status':
         if (($_SESSION['user']['role'] ?? '') !== 'admin') {
+            http_response_code(403);
             echo json_encode(['ok' => false, 'message' => 'Non autorizzato']); exit;
         }
         $d = json_decode(file_get_contents('php://input'), true);
@@ -112,6 +128,7 @@ switch ($action) {
     /* -------- REPORT DELETE (admin) -------- */
     case 'delete_report':
         if (($_SESSION['user']['role'] ?? '') !== 'admin') {
+            http_response_code(403);
             echo json_encode(['ok' => false, 'message' => 'Non autorizzato']); exit;
         }
         $d = json_decode(file_get_contents('php://input'), true);
@@ -122,6 +139,7 @@ switch ($action) {
     /* -------- ADMIN REPORTS -------- */
     case 'admin_reports':
         if (($_SESSION['user']['role'] ?? '') !== 'admin') {
+            http_response_code(403);
             echo json_encode(['ok' => false, 'message' => 'Non autorizzato']); exit;
         }
         $st = $pdo->query('SELECT * FROM reports ORDER BY created_at DESC');
@@ -130,17 +148,23 @@ switch ($action) {
 
     /* -------- VAULT LIST -------- */
     case 'vault_list':
-        $uid = $_SESSION['user']['id'] ?? null;
-        if (!$uid) { echo json_encode(['ok' => false, 'message' => 'Login richiesto']); exit; }
+        require_login_json();
+        $uid = $_SESSION['user']['id'];
         $st = $pdo->prepare('SELECT * FROM vault_items WHERE user_id = ? ORDER BY created_at DESC');
         $st->execute([$uid]);
-        echo json_encode(['ok' => true, 'items' => $st->fetchAll(PDO::FETCH_ASSOC)]);
+        $items = $st->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($items as &$item) {
+            $item['password_plain'] = vault_decrypt($item['password_enc']);
+            unset($item['password_enc']);
+        }
+        unset($item);
+        echo json_encode(['ok' => true, 'items' => $items]);
         break;
 
     /* -------- VAULT ADD -------- */
     case 'vault_add':
-        $uid = $_SESSION['user']['id'] ?? null;
-        if (!$uid) { echo json_encode(['ok' => false, 'message' => 'Login richiesto']); exit; }
+        require_login_json();
+        $uid = $_SESSION['user']['id'];
         $d = json_decode(file_get_contents('php://input'), true);
         $site = trim($d['site_name'] ?? '');
         $user = trim($d['username'] ?? '');
@@ -149,16 +173,17 @@ switch ($action) {
         if (!$site || !$user || !$pw) {
             echo json_encode(['ok' => false, 'message' => 'Servizio, username e password obbligatori']); exit;
         }
+        $pwEnc = vault_encrypt($pw);
         $pdo->prepare(
-            'INSERT INTO vault_items (user_id,site_name,username,password_plain,notes) VALUES (?,?,?,?,?)'
-        )->execute([$uid, $site, $user, $pw, $note]);
+            'INSERT INTO vault_items (user_id,site_name,username,password_enc,notes) VALUES (?,?,?,?,?)'
+        )->execute([$uid, $site, $user, $pwEnc, $note]);
         echo json_encode(['ok' => true]);
         break;
 
     /* -------- VAULT DELETE -------- */
     case 'vault_delete':
-        $uid = $_SESSION['user']['id'] ?? null;
-        if (!$uid) { echo json_encode(['ok' => false, 'message' => 'Login richiesto']); exit; }
+        require_login_json();
+        $uid = $_SESSION['user']['id'];
         $d = json_decode(file_get_contents('php://input'), true);
         $pdo->prepare('DELETE FROM vault_items WHERE id = ? AND user_id = ?')
             ->execute([$d['id'], $uid]);

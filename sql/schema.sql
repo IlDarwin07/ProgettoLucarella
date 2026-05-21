@@ -1,5 +1,6 @@
--- SafeSchool Hub — schema completo (ricostruito)
+-- SafeSchool Hub — schema completo
 -- root@itisff.it / admin1234  →  bcrypt cost=12
+-- NOTA: password_enc cifrata con AES-256-CBC via vault_encrypt() in api.php
 
 DROP DATABASE IF EXISTS safeschool_hub;
 CREATE DATABASE safeschool_hub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -29,13 +30,13 @@ CREATE TABLE reports (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE vault_items (
-  id             INT AUTO_INCREMENT PRIMARY KEY,
-  user_id        INT NOT NULL,
-  site_name      VARCHAR(120)  NOT NULL,
-  username       VARCHAR(190)  NOT NULL,
-  password_plain TEXT          NOT NULL,
-  notes          TEXT NULL,
-  created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT NOT NULL,
+  site_name    VARCHAR(120)  NOT NULL,
+  username     VARCHAR(190)  NOT NULL,
+  password_enc TEXT          NOT NULL,
+  notes        TEXT NULL,
+  created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
