@@ -4,6 +4,7 @@ require_once __DIR__ . '/includes/auth.php';
 if (empty($_SESSION['user'])) { header('Location: login.php'); exit; }
 $role = $_SESSION['user']['role'] ?? 'guest';
 $isGuest = ($role === 'guest');
+$isAdmin = ($role === 'admin');
 ?>
 <!DOCTYPE html>
 <html lang="it" data-theme="light">
@@ -329,39 +330,17 @@ textarea{min-height:90px}
     </div>
   </div>
 
-  <!-- PANNELLO ADMIN (bloccato per tutti tranne admin) -->
-  <?php if($isGuest): ?>
+  <!-- PANNELLO ADMIN: visibile SOLO agli admin, mai agli ospiti -->
+  <?php if($isAdmin): ?>
   <div class="section">
     <div class="section-header">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
       </svg>
       <span class="section-title">Pannello amministratore</span>
-      <span class="pill" style="background:color-mix(in oklab,var(--error) 12%,transparent);color:var(--error);margin-left:auto;font-size:.72rem;font-weight:600;padding:.15rem .55rem;border-radius:99px">Admin only</span>
     </div>
-    <div class="section-body locked-wrap">
-      <div class="locked-overlay">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-        <p>Questa sezione è riservata agli amministratori</p>
-      </div>
-      <div class="locked-preview" style="padding:.5rem 0">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem">
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;text-align:center">
-            <div style="font-size:1.4rem;font-weight:700;color:var(--primary)">12</div>
-            <div style="font-size:.78rem;color:var(--muted)">Segnalazioni</div>
-          </div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;text-align:center">
-            <div style="font-size:1.4rem;font-weight:700;color:var(--warn)">3</div>
-            <div style="font-size:.78rem;color:var(--muted)">In attesa</div>
-          </div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;text-align:center">
-            <div style="font-size:1.4rem;font-weight:700;color:var(--success)">9</div>
-            <div style="font-size:.78rem;color:var(--muted)">Risolte</div>
-          </div>
-        </div>
-      </div>
+    <div class="section-body">
+      <p style="color:var(--muted);font-size:.9rem">Benvenuto, amministratore. Gestisci le segnalazioni dal pannello completo.</p>
     </div>
   </div>
   <?php endif; ?>
