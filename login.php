@@ -1,6 +1,6 @@
 <?php
-session_start();
-if(!empty($_SESSION['user'])) { header('Location: index.php'); exit; }
+require_once __DIR__ . '/includes/auth.php';
+if(!empty($_SESSION['user'])) { header('Location: index.html'); exit; }
 ?>
 <!DOCTYPE html>
 <html lang="it" data-theme="light">
@@ -70,7 +70,7 @@ input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-
 </button>
 
 <div class="card">
-  <a href="index.php" class="logo">
+  <a href="index.html" class="logo">
     <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <rect x="2" y="2" width="28" height="28" rx="7" fill="var(--primary)" opacity=".12"/>
       <path d="M16 6 L26 10 L26 18 C26 23 21 27 16 29 C11 27 6 23 6 18 L6 10 Z" fill="var(--primary)" opacity=".25"/>
@@ -139,7 +139,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
     if(r.ok){
       msg.innerHTML = '<div class="msg ok">Accesso effettuato! Reindirizzamento…</div>';
-      setTimeout(function(){ window.location.href = 'index.php'; }, 600);
+      setTimeout(function(){ window.location.href = 'index.html'; }, 600);
     } else {
       msg.innerHTML = '<div class="msg err">' + (r.message || 'Credenziali non valide') + '</div>';
       btn.disabled = false;
