@@ -66,7 +66,7 @@ img{max-width:100%;height:auto}
 }
 .nav-tab:hover{color:var(--text)}
 .nav-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
-.nav-tab .tab-icon{font-size:1rem;opacity:.7}
+.nav-tab .tab-icon{display:flex;align-items:center;opacity:.7}
 .nav-tab .admin-dot{width:7px;height:7px;border-radius:50%;background:var(--admin);display:inline-block}
 
 /* === LAYOUT === */
@@ -78,7 +78,7 @@ img{max-width:100%;height:auto}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
 .card-body{padding:24px}
 .card-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
-.card-header h3{font-size:1.05rem}
+.card-header h3{font-size:1.05rem;display:flex;align-items:center;gap:8px}
 .card-hint{font-size:.8rem;color:var(--muted);line-height:1.5;margin-top:4px}
 
 /* === TWO COL === */
@@ -95,7 +95,7 @@ img{max-width:100%;height:auto}
 
 /* === BUTTONS === */
 .btn{border:0;border-radius:var(--radius-sm);padding:10px 18px;font-weight:700;cursor:pointer;
-  transition:background .18s,transform .12s,box-shadow .15s;font-size:.92rem}
+  transition:background .18s,transform .12s,box-shadow .15s;font-size:.92rem;display:inline-flex;align-items:center;gap:6px}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--primary);color:var(--primary-fg)}
 .btn-primary:hover{background:var(--primary-hover)}
@@ -143,7 +143,7 @@ form.grid-form{display:grid;gap:14px}
 .check-row{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:var(--radius-sm);
   border:1px solid var(--border);font-size:.88rem}
 .check-row.pass{border-color:rgba(67,122,34,.3);background:rgba(67,122,34,.04);color:var(--ok)}
-.check-icon{font-size:1rem;flex-shrink:0}
+.check-icon{display:flex;align-items:center;flex-shrink:0}
 
 /* === VAULT === */
 .vault-card{padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);
@@ -214,6 +214,10 @@ tbody td{padding:11px 14px;vertical-align:top}
 .session-dot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
 .session-dot.on{background:var(--ok)}
 .session-dot.admin{background:var(--admin)}
+
+/* === ICON HELPERS === */
+.icon{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+svg.ic{stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -222,21 +226,16 @@ tbody td{padding:11px 14px;vertical-align:top}
 <header class="topbar">
   <div class="brand">
     <div class="logo-wrap">
-      <!-- Logo SVG ITT Enrico Fermi Francavilla Fontana -->
       <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44" aria-label="ITT Enrico Fermi">
-        <!-- Scudo base -->
         <path d="M22 3L5 10V22C5 31.5 12.5 39.5 22 42C31.5 39.5 39 31.5 39 22V10L22 3Z"
               fill="var(--primary)" opacity=".15" stroke="var(--primary)" stroke-width="1.5"/>
-        <!-- Atomo: nucleo -->
         <circle cx="22" cy="22" r="2.5" fill="var(--primary)"/>
-        <!-- Atomo: orbite -->
         <ellipse cx="22" cy="22" rx="10" ry="4" stroke="var(--primary)" stroke-width="1.3"
                  fill="none" transform="rotate(0 22 22)"/>
         <ellipse cx="22" cy="22" rx="10" ry="4" stroke="var(--primary)" stroke-width="1.3"
                  fill="none" transform="rotate(60 22 22)"/>
         <ellipse cx="22" cy="22" rx="10" ry="4" stroke="var(--primary)" stroke-width="1.3"
                  fill="none" transform="rotate(120 22 22)"/>
-        <!-- Scudo bordo superiore con etichetta F -->
         <text x="22" y="12" text-anchor="middle" font-family="Cabinet Grotesk,sans-serif"
               font-weight="800" font-size="7" fill="var(--primary)">F</text>
       </svg>
@@ -251,20 +250,57 @@ tbody td{padding:11px 14px;vertical-align:top}
       <span class="session-dot" id="sessionDot"></span>
       <span id="sessionLabel">Ospite</span>
     </div>
-    <button class="btn btn-ghost btn-sm" id="themeBtn" aria-label="Cambia tema">&#9788;</button>
-    <button class="btn btn-ghost btn-sm" id="authBtn">Accedi</button>
-    <button class="btn btn-primary btn-sm hidden" id="logoutBtn">Logout</button>
+    <!-- Sun/Moon icon — toggled by JS -->
+    <button class="btn btn-ghost btn-sm" id="themeBtn" aria-label="Cambia tema">
+      <svg class="ic" width="18" height="18" viewBox="0 0 24 24" id="themeIcon">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+    <button class="btn btn-ghost btn-sm" id="authBtn">
+      <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Accedi
+    </button>
+    <button class="btn btn-primary btn-sm hidden" id="logoutBtn">
+      <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
   </div>
 </header>
 
 <!-- ===== NAVIGATION TABS ===== -->
 <nav class="main-nav" id="mainNav">
-  <button class="nav-tab active" data-tab="home"><span class="tab-icon">&#127968;</span> Home</button>
-  <button class="nav-tab" data-tab="segnalazioni"><span class="tab-icon">&#128204;</span> Segnalazioni</button>
-  <button class="nav-tab" data-tab="password-check"><span class="tab-icon">&#128274;</span> Analisi password</button>
-  <button class="nav-tab" data-tab="strumenti"><span class="tab-icon">&#9881;</span> Strumenti</button>
-  <button class="nav-tab" data-tab="vault"><span class="tab-icon">&#128220;</span> Il mio vault</button>
-  <button class="nav-tab hidden" data-tab="admin" id="adminTab"><span class="tab-icon">&#128737;</span> Admin <span class="admin-dot"></span></button>
+  <button class="nav-tab active" data-tab="home">
+    <span class="tab-icon"><svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    Home
+  </button>
+  <button class="nav-tab" data-tab="segnalazioni">
+    <span class="tab-icon"><svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+    Segnalazioni
+  </button>
+  <button class="nav-tab" data-tab="password-check">
+    <span class="tab-icon"><svg class="ic" width="15" height="15" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+    Analisi password
+  </button>
+  <button class="nav-tab" data-tab="strumenti">
+    <span class="tab-icon"><svg class="ic" width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+    Strumenti
+  </button>
+  <button class="nav-tab" data-tab="vault">
+    <span class="tab-icon"><svg class="ic" width="15" height="15" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+    Il mio vault
+  </button>
+  <button class="nav-tab hidden" data-tab="admin" id="adminTab">
+    <span class="tab-icon"><svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+    Admin <span class="admin-dot"></span>
+  </button>
 </nav>
 
 <main>
@@ -286,16 +322,21 @@ tbody td{padding:11px 14px;vertical-align:top}
   </div>
 
   <div class="kpi-strip">
-    <div class="kpi"><div class="kpi-label">Segnalazioni totali</div><div class="kpi-val" id="kpiReports">—</div></div>
+    <div class="kpi"><div class="kpi-label">Segnalazioni totali</div><div class="kpi-val" id="kpiReports">&mdash;</div></div>
     <div class="kpi"><div class="kpi-label">Criteri valutati</div><div class="kpi-val">12</div></div>
     <div class="kpi"><div class="kpi-label">Parole deboli bloccate</div><div class="kpi-val">16</div></div>
-    <div class="kpi"><div class="kpi-label">Elementi vault</div><div class="kpi-val" id="kpiVault">—</div></div>
+    <div class="kpi"><div class="kpi-label">Elementi vault</div><div class="kpi-val" id="kpiVault">&mdash;</div></div>
   </div>
 
   <div class="two-col">
     <!-- Come funziona -->
     <div class="card">
-      <div class="card-header"><h3>&#128218; Come funziona</h3></div>
+      <div class="card-header">
+        <h3>
+          <svg class="ic" width="17" height="17" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Come funziona
+        </h3>
+      </div>
       <div class="card-body">
         <div class="list">
           <div class="item"><div class="item-head"><b>1. Segnalazioni</b></div>
@@ -315,7 +356,12 @@ tbody td{padding:11px 14px;vertical-align:top}
     </div>
     <!-- Consigli rapidi -->
     <div class="card">
-      <div class="card-header"><h3>&#9889; Consigli rapidi</h3></div>
+      <div class="card-header">
+        <h3>
+          <svg class="ic" width="17" height="17" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Consigli rapidi
+        </h3>
+      </div>
       <div class="card-body">
         <div class="list" id="quickList"></div>
         <div class="divider"></div>
@@ -324,8 +370,14 @@ tbody td{padding:11px 14px;vertical-align:top}
           <span class="tiny" id="homeSessionInfo">modalità ospite</span>
         </div>
         <div class="mt16">
-          <button class="btn btn-primary" id="homeLoginBtn" style="width:100%">Accedi o crea account</button>
-          <button class="btn btn-ghost hidden" id="homeGoVault" style="width:100%;margin-top:8px" onclick="switchTab('vault')">Apri il mio vault &#8594;</button>
+          <button class="btn btn-primary" id="homeLoginBtn" style="width:100%">
+            <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Accedi o crea account
+          </button>
+          <button class="btn btn-ghost hidden" id="homeGoVault" style="width:100%;margin-top:8px" onclick="switchTab('vault')">
+            Apri il mio vault
+            <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
         </div>
       </div>
     </div>
@@ -339,7 +391,10 @@ tbody td{padding:11px 14px;vertical-align:top}
 <div class="wrap">
   <div class="flex-between mt8" style="margin-bottom:20px">
     <div>
-      <h2 style="font-size:1.5rem">&#128204; Segnalazioni</h2>
+      <h2 style="font-size:1.5rem;display:flex;align-items:center;gap:10px">
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Segnalazioni
+      </h2>
       <p class="tiny muted mt8">Invia una segnalazione &mdash; anche in modo anonimo. Non è richiesto alcun account.</p>
     </div>
   </div>
@@ -385,7 +440,10 @@ tbody td{padding:11px 14px;vertical-align:top}
                 <option>Media</option><option>Alta</option><option>Bassa</option>
               </select>
             </div>
-            <button class="btn btn-primary" type="submit" style="align-self:end">Invia segnalazione</button>
+            <button class="btn btn-primary" type="submit" style="align-self:end">
+              <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Invia segnalazione
+            </button>
           </div>
         </form>
         <div id="reportMsg"></div>
@@ -409,7 +467,10 @@ tbody td{padding:11px 14px;vertical-align:top}
 <div class="section" id="sec-password-check">
 <div class="wrap">
   <div style="margin-bottom:20px">
-    <h2 style="font-size:1.5rem">&#128274; Analisi password</h2>
+    <h2 style="font-size:1.5rem;display:flex;align-items:center;gap:10px">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Analisi password
+    </h2>
     <p class="tiny muted mt8">La password viene analizzata localmente nel browser &mdash; non viene mai inviata al server.</p>
   </div>
   <div class="two-col">
@@ -431,7 +492,12 @@ tbody td{padding:11px 14px;vertical-align:top}
       </div>
     </div>
     <div class="card">
-      <div class="card-header"><h3>Criteri valutati (12)</h3></div>
+      <div class="card-header">
+        <h3>
+          <svg class="ic" width="17" height="17" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Criteri valutati (12)
+        </h3>
+      </div>
       <div class="card-body">
         <div id="scoreChecks" class="list"></div>
       </div>
@@ -444,22 +510,39 @@ tbody td{padding:11px 14px;vertical-align:top}
 <div class="section" id="sec-strumenti">
 <div class="wrap">
   <div style="margin-bottom:20px">
-    <h2 style="font-size:1.5rem">&#9881; Strumenti</h2>
+    <h2 style="font-size:1.5rem;display:flex;align-items:center;gap:10px">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Strumenti
+    </h2>
     <p class="tiny muted mt8">Generatore di password sicure e checklist buone pratiche. Pubblici, nessun login richiesto.</p>
   </div>
   <div class="two-col">
     <!-- Generatore -->
     <div class="card">
-      <div class="card-header"><h3>&#128221; Generatore password</h3></div>
+      <div class="card-header">
+        <h3>
+          <svg class="ic" width="17" height="17" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Generatore password
+        </h3>
+      </div>
       <div class="card-body">
         <p class="tiny muted" style="margin-bottom:16px">Genera una password casuale da 18 caratteri oppure una passphrase facile da ricordare composta da parole reali.</p>
         <div class="row2">
-          <button class="btn btn-primary" id="genRandom" type="button">Genera casuale</button>
-          <button class="btn btn-ghost" id="genPhrase" type="button">Genera passphrase</button>
+          <button class="btn btn-primary" id="genRandom" type="button">
+            <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+            Genera casuale
+          </button>
+          <button class="btn btn-ghost" id="genPhrase" type="button">
+            <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Genera passphrase
+          </button>
         </div>
         <div style="margin-top:14px;display:flex;gap:8px;align-items:center">
           <input class="input" id="generatedPw" readonly placeholder="La password apparirà qui…">
-          <button class="btn btn-ghost btn-sm" id="copyPw" type="button">Copia</button>
+          <button class="btn btn-ghost btn-sm" id="copyPw" type="button">
+            <svg class="ic" width="14" height="14" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copia
+          </button>
         </div>
         <div id="genMsg" class="muted tiny" style="margin-top:8px"></div>
         <div class="divider"></div>
@@ -468,7 +551,12 @@ tbody td{padding:11px 14px;vertical-align:top}
     </div>
     <!-- Checklist -->
     <div class="card">
-      <div class="card-header"><h3>&#9989; Checklist sicurezza (12 regole)</h3></div>
+      <div class="card-header">
+        <h3>
+          <svg class="ic" width="17" height="17" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Checklist sicurezza (12 regole)
+        </h3>
+      </div>
       <div class="card-body">
         <div id="advChecklist" class="list"></div>
       </div>
@@ -481,7 +569,10 @@ tbody td{padding:11px 14px;vertical-align:top}
 <div class="section" id="sec-vault">
 <div class="wrap">
   <div style="margin-bottom:20px">
-    <h2 style="font-size:1.5rem">&#128220; Il mio Vault</h2>
+    <h2 style="font-size:1.5rem;display:flex;align-items:center;gap:10px">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Il mio Vault
+    </h2>
     <p class="tiny muted mt8">Salva le credenziali dei servizi scolastici. Accessibile solo dopo il login.</p>
   </div>
   <div class="two-col">
@@ -489,8 +580,14 @@ tbody td{padding:11px 14px;vertical-align:top}
       <div class="card-header"><h3>Aggiungi credenziale</h3></div>
       <div class="card-body">
         <div id="vaultGuestMsg" class="muted">
-          <p>&#128274; Accedi o crea un account per usare il vault personale.</p>
-          <button class="btn btn-primary mt16" id="vaultLoginBtn">Accedi / Registrati</button>
+          <p style="display:flex;align-items:center;gap:8px">
+            <svg class="ic" width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Accedi o crea un account per usare il vault personale.
+          </p>
+          <button class="btn btn-primary mt16" id="vaultLoginBtn">
+            <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Accedi / Registrati
+          </button>
         </div>
         <form id="vaultForm" class="grid-form hidden">
           <div class="field"><label class="label">Servizio</label><input class="input" name="site_name" placeholder="es. Moodle, Registro, GitHub, Drive"></div>
@@ -499,14 +596,17 @@ tbody td{padding:11px 14px;vertical-align:top}
             <div class="field"><label class="label">Password</label><input class="input" type="password" name="password_plain" placeholder="password del servizio"></div>
           </div>
           <div class="field"><label class="label">Note</label><textarea class="input" name="notes" rows="2" placeholder="Note opzionali"></textarea></div>
-          <button class="btn btn-primary" type="submit">Salva nel vault</button>
+          <button class="btn btn-primary" type="submit">
+            <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salva nel vault
+          </button>
         </form>
       </div>
     </div>
     <div class="card">
       <div class="card-header">
         <h3>Credenziali salvate</h3>
-        <span class="kpi-val" id="kpiVault2" style="font-size:1.3rem">—</span>
+        <span class="kpi-val" id="kpiVault2" style="font-size:1.3rem">&mdash;</span>
       </div>
       <div class="card-body">
         <div id="vaultList" class="list"></div>
@@ -521,17 +621,22 @@ tbody td{padding:11px 14px;vertical-align:top}
 <div class="wrap">
   <div class="flex-between" style="margin-bottom:20px">
     <div>
-      <h2 style="font-size:1.5rem">&#128737; Pannello Admin</h2>
+      <h2 style="font-size:1.5rem;display:flex;align-items:center;gap:10px">
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Pannello Admin
+      </h2>
       <p class="tiny muted mt8">Visibile solo agli amministratori. Gestisci tutte le segnalazioni ricevute.</p>
     </div>
-    <button class="btn btn-admin btn-sm" onclick="loadAdminReports()">&#8635; Aggiorna</button>
+    <button class="btn btn-admin btn-sm" onclick="loadAdminReports()">
+      <svg class="ic" width="14" height="14" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Aggiorna
+    </button>
   </div>
 
-  <!-- Riepilogo admin -->
   <div class="three-col" style="margin-bottom:24px">
-    <div class="kpi"><div class="kpi-label">Totale segnalazioni</div><div class="kpi-val" id="adminTotal">—</div></div>
-    <div class="kpi"><div class="kpi-label">Aperte</div><div class="kpi-val" id="adminAperte" style="color:var(--warn)">—</div></div>
-    <div class="kpi"><div class="kpi-label">Risolte</div><div class="kpi-val" id="adminRisolte" style="color:var(--ok)">—</div></div>
+    <div class="kpi"><div class="kpi-label">Totale segnalazioni</div><div class="kpi-val" id="adminTotal">&mdash;</div></div>
+    <div class="kpi"><div class="kpi-label">Aperte</div><div class="kpi-val" id="adminAperte" style="color:var(--warn)">&mdash;</div></div>
+    <div class="kpi"><div class="kpi-label">Risolte</div><div class="kpi-val" id="adminRisolte" style="color:var(--ok)">&mdash;</div></div>
   </div>
 
   <div class="card">
@@ -568,21 +673,29 @@ tbody td{padding:11px 14px;vertical-align:top}
   <div class="modal-box">
     <div class="modal-head">
       <h2>Accesso</h2>
-      <button class="btn btn-ghost btn-sm" id="closeAuth">&#10005;</button>
+      <button class="btn btn-ghost btn-sm" id="closeAuth" aria-label="Chiudi">
+        <svg class="ic" width="16" height="16" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="row2">
       <form id="loginForm" class="grid-form">
         <h3 style="margin-bottom:4px">Accedi</h3>
         <div class="field"><label class="label">Email</label><input class="input" name="email" type="email" placeholder="email@scuola.it"></div>
         <div class="field"><label class="label">Password</label><input class="input" name="password" type="password" placeholder="password"></div>
-        <button class="btn btn-primary" type="submit">Accedi</button>
+        <button class="btn btn-primary" type="submit">
+          <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Accedi
+        </button>
       </form>
       <form id="registerForm" class="grid-form">
         <h3 style="margin-bottom:4px">Crea account</h3>
         <div class="field"><label class="label">Nome</label><input class="input" name="name" placeholder="Nome completo"></div>
         <div class="field"><label class="label">Email</label><input class="input" name="email" type="email" placeholder="email@scuola.it"></div>
         <div class="field"><label class="label">Password</label><input class="input" name="password" type="password" placeholder="min. 50/100 sicurezza"></div>
-        <button class="btn btn-primary" type="submit">Registrati</button>
+        <button class="btn btn-primary" type="submit">
+          <svg class="ic" width="15" height="15" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          Registrati
+        </button>
       </form>
     </div>
     <div id="authMsg"></div>
@@ -591,11 +704,19 @@ tbody td{padding:11px 14px;vertical-align:top}
 
 <script>
 /* ========== DATI STATICI ========== */
+/* SVG check e dot per consigli rapidi */
+var IC_LOCK = '<svg style="display:inline-flex;flex-shrink:0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+var IC_PHONE = '<svg style="display:inline-flex;flex-shrink:0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>';
+var IC_EYE_OFF = '<svg style="display:inline-flex;flex-shrink:0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+var IC_LOG_OUT = '<svg style="display:inline-flex;flex-shrink:0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+var IC_CHECK = '<svg style="display:inline-flex;flex-shrink:0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+var IC_DOT = '<svg style="display:inline-flex;flex-shrink:0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>';
+
 var QUICK = [
-  '&#128274; Usa almeno 12 caratteri nelle password',
-  '&#128241; Attiva la verifica in 2 passaggi sulla mail',
-  '&#128683; Non condividere password in chat di classe',
-  '&#128682; Fai logout dai PC dei laboratori'
+  [IC_LOCK, 'Usa almeno 12 caratteri nelle password'],
+  [IC_PHONE, 'Attiva la verifica in 2 passaggi sulla mail'],
+  [IC_EYE_OFF, 'Non condividere password in chat di classe'],
+  [IC_LOG_OUT, 'Fai logout dai PC dei laboratori']
 ];
 var ADV = [
   'Non riutilizzare la stessa password su più servizi',
@@ -621,7 +742,7 @@ var CRITERIA = [
   ['Numeri (0-9)',            function(v){return /[0-9]/.test(v)}],
   ['Simboli speciali (!@#…)', function(v){return /[^\w\s]/.test(v)}],
   ['Spazi o passphrase',      function(v){return /\s/.test(v)}],
-  ['Nessuna tripletta (aaa)', function(v){return !/(.)\1{2,}/.test(v)}],
+  ['Nessuna tripletta (aaa)', function(v){return !/(.)\\1{2,}/.test(v)}],
   ['No parole deboli',        function(v){return !/password|1234|qwerty|admin|scuola/i.test(v)}],
   ['Lunghezza ottimale 20+',  function(v){return v.length>=20}]
 ];
@@ -649,12 +770,12 @@ function catBadge(c) {
 /* ========== RENDER STATICI ========== */
 function renderQuick(){
   document.getElementById('quickList').innerHTML = QUICK.map(function(t){
-    return '<div class="check-row pass tiny">'+t+'</div>';
+    return '<div class="check-row pass tiny"><span class="check-icon">'+t[0]+'</span>'+t[1]+'</div>';
   }).join('');
 }
 function renderAdv(){
   document.getElementById('advChecklist').innerHTML = ADV.map(function(t,i){
-    return '<div class="check-row tiny"><span class="check-icon">'+(i+1)+'.</span>'+t+'</div>';
+    return '<div class="check-row tiny"><span class="check-icon" style="color:var(--muted);font-size:.78rem;font-weight:700;min-width:20px">'+(i+1)+'</span>'+t+'</div>';
   }).join('');
 }
 
@@ -665,7 +786,7 @@ function evalPassword(val){
   if(l>=8) s+=10; if(l>=12) s+=15; if(l>=16) s+=10; if(l>=20) s+=5;
   if(/[A-Z]/.test(val)) s+=10; if(/[a-z]/.test(val)) s+=10;
   if(/[0-9]/.test(val)) s+=10; if(/[^\w\s]/.test(val)) s+=15;
-  if(/\s/.test(val)) s+=5; if(!/(.)\1{2,}/.test(val)) s+=5;
+  if(/\s/.test(val)) s+=5; if(!/(.)\\1{2,}/.test(val)) s+=5;
   if(!/password|1234|qwerty|admin|scuola|letmein|abc123/i.test(val)) s+=5;
   s=Math.min(s,100);
   document.getElementById('scoreBar').style.width=s+'%';
@@ -675,7 +796,7 @@ function evalPassword(val){
   document.getElementById('scoreChecks').innerHTML = CRITERIA.map(function(c){
     var ok=c[1](val);
     return '<div class="check-row '+(ok?'pass':'')+'">'
-      +'<span class="check-icon">'+(ok?'✓':'·')+'</span>'+c[0]+'</div>';
+      +'<span class="check-icon">'+(ok?IC_CHECK:IC_DOT)+'</span>'+c[0]+'</div>';
   }).join('');
 }
 
@@ -704,23 +825,18 @@ async function loadSession(){
   var s=await api('session');
   var user=s.user;
   var isAdmin=user&&user.role==='admin';
-  // Topbar
   document.getElementById('authBtn').classList.toggle('hidden',!!user);
   document.getElementById('logoutBtn').classList.toggle('hidden',!user);
-  // Session pill
   var dot=document.getElementById('sessionDot');
   var lbl=document.getElementById('sessionLabel');
   dot.className='session-dot'+(isAdmin?' admin':user?' on':'');
   lbl.textContent=isAdmin?'Admin: '+user.name:user?user.name:'Ospite';
-  // Home
   document.getElementById('homeSessionInfo').textContent=
     isAdmin?'Admin: '+user.name:user?user.name+' — account attivo':'modalità ospite';
   document.getElementById('homeLoginBtn').classList.toggle('hidden',!!user);
   document.getElementById('homeGoVault').classList.toggle('hidden',!user);
-  // Admin tab
   document.getElementById('adminTab').classList.toggle('hidden',!isAdmin);
   if(isAdmin) loadAdminReports();
-  // Vault
   var vf=document.getElementById('vaultForm');
   var vg=document.getElementById('vaultGuestMsg');
   vf.classList.toggle('hidden',!user);
@@ -788,14 +904,12 @@ async function loadAdminReports(){
       +'<td><button class="btn btn-danger btn-sm" data-del="'+x.id+'">Elimina</button></td>'
       +'</tr>';
   }).join('');
-  // Status change
   document.querySelectorAll('.status-select').forEach(function(sel){
     sel.addEventListener('change',async function(){
       await api('update_report_status','POST',{id:sel.dataset.rid,status:sel.value});
       loadAdminReports();
     });
   });
-  // Delete
   document.querySelectorAll('[data-del]').forEach(function(btn){
     btn.addEventListener('click',async function(){
       if(!confirm('Eliminare questa segnalazione?')) return;
@@ -822,7 +936,6 @@ document.querySelectorAll('.nav-tab').forEach(function(t){
 });
 
 /* ========== EVENTI FORM ========== */
-// Anonimo
 var anonCheck=document.getElementById('anonCheck');
 var nameInput=document.getElementById('nameInput');
 anonCheck.addEventListener('change',function(){
@@ -831,7 +944,6 @@ anonCheck.addEventListener('change',function(){
   if(anonCheck.checked) nameInput.value='';
 });
 
-// Segnalazione
 document.getElementById('reportForm').addEventListener('submit',async function(e){
   e.preventDefault();
   var fd=Object.fromEntries(new FormData(e.target));
@@ -843,12 +955,10 @@ document.getElementById('reportForm').addEventListener('submit',async function(e
   if(r.ok){e.target.reset();anonCheck.checked=false;nameInput.disabled=false;loadReports();}
 });
 
-// Score
 document.getElementById('scoreInput').addEventListener('input',function(e){
   evalPassword(e.target.value);
 });
 
-// Generatori
 document.getElementById('genRandom').addEventListener('click',async function(){
   var r=await api('generate_password');
   if(r.ok){document.getElementById('generatedPw').value=r.password;
@@ -865,7 +975,6 @@ document.getElementById('copyPw').addEventListener('click',function(){
   if(v) navigator.clipboard.writeText(v).then(function(){document.getElementById('genMsg').textContent='Copiata negli appunti!';});
 });
 
-// Auth modal
 function openAuth(){document.getElementById('authModal').classList.add('open');}
 function closeAuth(){document.getElementById('authModal').classList.remove('open');}
 document.getElementById('authBtn').addEventListener('click',openAuth);
@@ -889,17 +998,25 @@ document.getElementById('logoutBtn').addEventListener('click',async function(){
   await api('logout');loadSession();
 });
 
-// Vault form
 document.getElementById('vaultForm').addEventListener('submit',async function(e){
   e.preventDefault();
   var r=await api('save_password','POST',Object.fromEntries(new FormData(e.target)));
   if(r.ok){e.target.reset();loadVault();}
 });
 
-// Tema
+/* Tema: aggiorna anche l'icona */
 document.getElementById('themeBtn').addEventListener('click',function(){
   var t=document.documentElement.getAttribute('data-theme');
-  document.documentElement.setAttribute('data-theme',t==='dark'?'light':'dark');
+  var next=t==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  var icon=document.getElementById('themeIcon');
+  if(next==='dark'){
+    /* Moon icon */
+    icon.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  } else {
+    /* Sun icon */
+    icon.innerHTML='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  }
 });
 
 /* ========== INIT ========== */
