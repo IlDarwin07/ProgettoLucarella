@@ -87,7 +87,8 @@
     .section.active { display: block; }
 
     .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6); box-shadow: var(--shadow-sm); }
-    .card-title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--space-4); }
+    .card-title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2); }
+    .card-title svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--color-primary); }
 
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-8); }
     .kpi { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-5); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: var(--space-2); }
@@ -327,15 +328,24 @@
         </div>
         <div class="dashboard-grid">
           <div class="card">
-            <div class="card-title">Segnalazioni recenti</div>
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+              Segnalazioni recenti
+            </div>
             <div id="dashRecenti"></div>
           </div>
           <div class="card">
-            <div class="card-title">Categorie più segnalate</div>
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Categorie più segnalate
+            </div>
             <div id="dashCategorie"></div>
           </div>
           <div class="card span-2">
-            <div class="card-title">A proposito di SafeSchool Hub</div>
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              A proposito di SafeSchool Hub
+            </div>
             <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.7;max-width:72ch">SafeSchool Hub è una piattaforma web sviluppata per il contesto scolastico dell'ITT Enrico Fermi di Francavilla Fontana. Permette a studenti e docenti di segnalare problemi, consultare risorse didattiche e formarsi sulla privacy digitale e sulla sicurezza in rete. Il progetto nasce dall'esigenza reale di avere uno strumento centralizzato, semplice e sicuro per comunicare all'interno della scuola.</p>
             <div class="divider"></div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-4)">
@@ -397,7 +407,10 @@
           </div>
         </div>
         <div class="card" style="margin-bottom:var(--space-6)">
-          <div class="card-title">Il tuo punteggio di sicurezza</div>
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Il tuo punteggio di sicurezza
+          </div>
           <div style="display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-3)">
             <div style="font-family:var(--font-display);font-size:var(--text-2xl);font-weight:800;color:var(--color-primary)" id="privacyScore">0%</div>
             <div style="flex:1"><div class="progress-bar"><div class="progress-fill" id="privacyBar" style="width:0%"></div></div></div>
@@ -419,7 +432,10 @@
         <div class="tools-grid">
           <!-- Generatore password -->
           <div class="card">
-            <div class="card-title">🔑 Generatore password sicura</div>
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+              Generatore password sicura
+            </div>
             <div class="pwd-length-row">
               <label for="pwdLen">Lunghezza</label>
               <input type="range" id="pwdLen" min="8" max="64" value="16" oninput="document.getElementById('pwdLenVal').textContent=this.value;generatePassword()">
@@ -429,7 +445,7 @@
               <label class="pwd-opt"><input type="checkbox" id="optMaiusc" checked onchange="generatePassword()"> Lettere maiuscole (A–Z)</label>
               <label class="pwd-opt"><input type="checkbox" id="optMinus" checked onchange="generatePassword()"> Lettere minuscole (a–z)</label>
               <label class="pwd-opt"><input type="checkbox" id="optNum" checked onchange="generatePassword()"> Numeri (0–9)</label>
-              <label class="pwd-opt"><input type="checkbox" id="optSym" checked onchange="generatePassword()"> Simboli (!@#$%^&*)</label>
+              <label class="pwd-opt"><input type="checkbox" id="optSym" checked onchange="generatePassword()"> Simboli (!@#$%^&amp;*)</label>
               <label class="pwd-opt"><input type="checkbox" id="optNoAmb" onchange="generatePassword()"> Escludi caratteri ambigui (0,O,l,1,I)</label>
             </div>
             <div class="pwd-output-wrap">
@@ -452,7 +468,10 @@
 
           <!-- Analizzatore forza -->
           <div class="card">
-            <div class="card-title">🔍 Analisi sicurezza password</div>
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Analisi sicurezza password
+            </div>
             <div class="form-group" style="margin-bottom:var(--space-2)">
               <label class="form-label" for="checkPwdInput">Inserisci una password da analizzare</label>
               <input class="form-input" type="password" id="checkPwdInput" placeholder="Scrivi qui..." oninput="analyzePassword(this.value)">
@@ -475,7 +494,10 @@
 
         <!-- Vault -->
         <div class="card">
-          <div class="card-title">🔐 Vault — Le mie password</div>
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+            Vault — Le mie password
+          </div>
           <div class="vault-add-form" id="vaultAddForm">
             <input class="form-input" type="text" id="vaultSite" placeholder="Sito / Servizio">
             <input class="form-input" type="text" id="vaultUser" placeholder="Utente / Email">
@@ -498,8 +520,20 @@
           </div>
         </div>
         <div class="dashboard-grid">
-          <div class="card"><div class="card-title">Statistiche sistema</div><div id="adminStats"></div></div>
-          <div class="card"><div class="card-title">Segnalazioni da gestire</div><div id="adminList"></div></div>
+          <div class="card">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Statistiche sistema
+            </div>
+            <div id="adminStats"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Segnalazioni da gestire
+            </div>
+            <div id="adminList"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -625,15 +659,15 @@
     const pct = Math.round(done / checklist.length * 100);
     document.getElementById('privacyScore').textContent = pct + '%';
     document.getElementById('privacyBar').style.width = pct + '%';
-    const msgs = ['Inizia a completare la checklist qui sotto.','Stai facendo progressi, continua!','Più della metà completata, ottimo lavoro!','Quasi al sicuro, ancora un po\'!','Perfetto! Segui tutte le best practice di sicurezza digitale 🎉'];
+    const msgs = ['Inizia a completare la checklist qui sotto.','Stai facendo progressi, continua!','Piu della meta completata, ottimo lavoro!','Quasi al sicuro, ancora un po\'!','Perfetto! Segui tutte le best practice di sicurezza digitale.'];
     document.getElementById('privacyMsg').textContent = msgs[Math.floor(pct/25)];
   }
 
   // ── Admin ─────────────────────────────────────────────────────────────────
   function renderAdmin() {
-    document.getElementById('adminStats').innerHTML = [['Totale segnalazioni',segnalazioni.length],['Aperte',segnalazioni.filter(s=>s.stato==='aperta').length],['Risolte',segnalazioni.filter(s=>s.stato==='risolta').length],['Priorità Alta',segnalazioni.filter(s=>s.priorita==='Alta').length],['Checklist privacy',checklist.filter(c=>c.checked).length+' / '+checklist.length]].map(([l,v])=>`<div class="stat-row"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('');
+    document.getElementById('adminStats').innerHTML = [['Totale segnalazioni',segnalazioni.length],['Aperte',segnalazioni.filter(s=>s.stato==='aperta').length],['Risolte',segnalazioni.filter(s=>s.stato==='risolta').length],['Priorita Alta',segnalazioni.filter(s=>s.priorita==='Alta').length],['Checklist privacy',checklist.filter(c=>c.checked).length+' / '+checklist.length]].map(([l,v])=>`<div class="stat-row"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('');
     const aperte = segnalazioni.filter(s=>s.stato==='aperta');
-    document.getElementById('adminList').innerHTML = aperte.length ? aperte.map(s=>`<div class="stat-row"><div><div style="font-weight:600;font-size:var(--text-sm)">${s.titolo}</div><div style="font-size:var(--text-xs);color:var(--color-text-faint)">${s.nome} &middot; ${s.data}</div></div><span class="badge badge-${s.priorita.toLowerCase()}">${s.priorita}</span></div>`).join('') : '<p style="font-size:var(--text-sm);color:var(--color-text-muted);padding:var(--space-4) 0">Nessuna segnalazione aperta 🎉</p>';
+    document.getElementById('adminList').innerHTML = aperte.length ? aperte.map(s=>`<div class="stat-row"><div><div style="font-weight:600;font-size:var(--text-sm)">${s.titolo}</div><div style="font-size:var(--text-xs);color:var(--color-text-faint)">${s.nome} &middot; ${s.data}</div></div><span class="badge badge-${s.priorita.toLowerCase()}">${s.priorita}</span></div>`).join('') : '<p style="font-size:var(--text-sm);color:var(--color-text-muted);padding:var(--space-4) 0">Nessuna segnalazione aperta.</p>';
   }
 
   // ── Generatore password ───────────────────────────────────────────────────
@@ -690,7 +724,7 @@
       { w: '60%',  color: 'var(--color-warning)',   text: 'Accettabile' },
       { w: '72%',  color: 'var(--color-orange)',    text: 'Buona' },
       { w: '84%',  color: 'var(--color-success)',   text: 'Forte' },
-      { w: '100%', color: 'var(--color-success)',   text: 'Molto forte 🔒' },
+      { w: '100%', color: 'var(--color-success)',   text: 'Molto forte' },
     ];
     const lv = pwd.length === 0 ? levels[0] : levels[Math.min(score, 7)];
     fill.style.width = lv.w;
