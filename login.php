@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
-if(!empty($_SESSION['user'])) { header('Location: index.php'); exit; }
+if(!empty($_SESSION['user'])) {
+    if(($_SESSION['user']['role'] ?? '') === 'guest') { header('Location: guest.php'); exit; }
+    header('Location: index.php'); exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="it" data-theme="light">
@@ -44,8 +47,12 @@ input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-
 .btn-primary{background:var(--primary);color:#fff}
 .btn-primary:hover{background:var(--primary-h)}
 .btn-primary:disabled{opacity:.6;cursor:not-allowed}
-.divider{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
-.register-link{text-align:center;font-size:.88rem;color:var(--muted)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg);color:var(--text);border-color:color-mix(in oklab,var(--text) 30%,transparent)}
+.divider{display:flex;align-items:center;gap:.75rem;margin:1.5rem 0}
+.divider span{font-size:.78rem;color:var(--muted);white-space:nowrap}
+.divider::before,.divider::after{content:'';flex:1;border-top:1px solid var(--border)}
+.register-link{text-align:center;font-size:.88rem;color:var(--muted);margin-top:1.25rem}
 .register-link a{color:var(--primary);font-weight:600;text-decoration:none}
 .register-link a:hover{text-decoration:underline}
 .msg{padding:.65rem .9rem;border-radius:var(--radius);font-size:.85rem;margin-top:.75rem}
@@ -55,6 +62,7 @@ input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-
   border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;
   color:var(--muted);transition:background .18s}
 .theme-btn:hover{background:var(--border)}
+.guest-note{font-size:.78rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.4}
 </style>
 </head>
 <body>
@@ -102,7 +110,17 @@ input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-
     <div id="msg"></div>
   </form>
 
-  <hr class="divider">
+  <div class="divider"><span>oppure</span></div>
+
+  <button class="btn btn-ghost" id="guestBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+    Accedi come ospite
+  </button>
+  <p class="guest-note">Puoi inviare segnalazioni anonime senza registrarti.<br>Alcune funzionalità non saranno disponibili.</p>
+
   <p class="register-link">Non hai un account? <a href="register.php">Registrati!</a></p>
 </div>
 
@@ -136,7 +154,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         password: document.getElementById('password').value
       })
     }).then(function(x){ return x.json(); });
-
     if(r.ok){
       msg.innerHTML = '<div class="msg ok">Accesso effettuato! Reindirizzamento…</div>';
       setTimeout(function(){ window.location.href = 'index.php'; }, 600);
@@ -149,6 +166,25 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     msg.innerHTML = '<div class="msg err">Errore di rete. Riprova.</div>';
     btn.disabled = false;
     btn.textContent = 'Accedi';
+  }
+});
+
+document.getElementById('guestBtn').addEventListener('click', async function(){
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = 'Accesso ospite…';
+  try {
+    var r = await fetch('api.php?action=guest_login', { method: 'POST' })
+      .then(function(x){ return x.json(); });
+    if(r.ok){
+      window.location.href = 'guest.php';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Accedi come ospite';
+    }
+  } catch(err){
+    btn.disabled = false;
+    btn.textContent = 'Accedi come ospite';
   }
 });
 </script>

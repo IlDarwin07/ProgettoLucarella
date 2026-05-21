@@ -27,6 +27,17 @@ switch ($action) {
         echo json_encode(['ok' => true, 'user' => $_SESSION['user'] ?? null]);
         break;
 
+    /* -------- GUEST LOGIN -------- */
+    case 'guest_login':
+        $_SESSION['user'] = [
+            'id'    => null,
+            'name'  => 'Ospite',
+            'email' => null,
+            'role'  => 'guest',
+        ];
+        echo json_encode(['ok' => true, 'user' => $_SESSION['user']]);
+        break;
+
     /* -------- LOGIN -------- */
     case 'login':
         $d = json_decode(file_get_contents('php://input'), true);
@@ -87,7 +98,7 @@ switch ($action) {
 
     /* -------- REPORTS (lista pubblica) -------- */
     case 'reports':
-        $st = $pdo->query('SELECT * FROM reports ORDER BY created_at DESC LIMIT 30');
+        $st = $pdo->query('SELECT id, name, category, title, priority, status, created_at FROM reports ORDER BY created_at DESC LIMIT 30');
         echo json_encode(['ok' => true, 'reports' => $st->fetchAll(PDO::FETCH_ASSOC)]);
         break;
 
