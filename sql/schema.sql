@@ -1,15 +1,7 @@
--- =============================================
--- SafeSchool Hub — Schema database
--- Ricrea completamente il database
--- =============================================
-
 DROP DATABASE IF EXISTS safeschool_hub;
 CREATE DATABASE safeschool_hub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE safeschool_hub;
 
--- -------------------------------------------------
--- Tabella utenti (password con bcrypt hash)
--- -------------------------------------------------
 CREATE TABLE users (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   name          VARCHAR(120)  NOT NULL,
@@ -19,9 +11,6 @@ CREATE TABLE users (
   created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- -------------------------------------------------
--- Tabella segnalazioni
--- -------------------------------------------------
 CREATE TABLE reports (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   user_id       INT NULL,
@@ -36,9 +25,6 @@ CREATE TABLE reports (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- -------------------------------------------------
--- Tabella vault password
--- -------------------------------------------------
 CREATE TABLE vault_items (
   id             INT AUTO_INCREMENT PRIMARY KEY,
   user_id        INT NOT NULL,
@@ -50,14 +36,8 @@ CREATE TABLE vault_items (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =============================================
--- UTENTE ROOT ADMIN
--- email:    root@itisff.it
--- password: admin1234
--- hash bcrypt cost=12
--- =============================================
-INSERT INTO users (name, email, password_hash, role)
-VALUES (
+-- root@itisff.it / admin1234  (bcrypt cost=12)
+INSERT INTO users (name, email, password_hash, role) VALUES (
   'Root Administrator',
   'root@itisff.it',
   '$2y$12$YkaxOfsUVySKfniUCV0a4O7FQ8GPTJawpzOY6EI9GeBVP/b9tPzuu',

@@ -72,7 +72,6 @@ if ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($st->fetch()) {
         echo json_encode(['ok'=>false,'message'=>'Email già registrata']); exit;
     }
-    // Hashing bcrypt esplicito cost=12
     $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
     $st = $pdo->prepare('INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)');
     $st->execute([$name, $email, $hash, 'user']);
@@ -87,13 +86,11 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $st = $pdo->prepare('SELECT * FROM users WHERE email=?');
     $st->execute([$email]);
     $u = $st->fetch();
-    // Verifica bcrypt
     if (!$u || !password_verify($password, $u['password_hash'])) {
         echo json_encode(['ok'=>false,'message'=>'Credenziali non valide']); exit;
     }
-    // Rehash automatico se il cost è cambiato
-    if (password_needs_rehash($u['password_hash'], PASSWORD_BCRYPT, ['cost' => 12])) {
-        $newHash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+    if (password_needs_rehash($u['password_hash'], PASSWORD_BCRYPT, ['cost'=>12])) {
+        $newHash = password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]);
         $pdo->prepare('UPDATE users SET password_hash=? WHERE id=?')->execute([$newHash, $u['id']]);
     }
     $_SESSION['user'] = ['id'=>(int)$u['id'],'name'=>$u['name'],'email'=>$u['email'],'role'=>$u['role']];
