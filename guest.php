@@ -1,152 +1,331 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
-// Consenti sia ospiti che utenti registrati; blocca solo chi non ha sessione
 if (empty($_SESSION['user'])) { header('Location: login.php'); exit; }
 $role = $_SESSION['user']['role'] ?? 'guest';
 $isGuest = ($role === 'guest');
 $isAdmin = ($role === 'admin');
+$userName = $_SESSION['user']['name'] ?? 'Utente';
 ?>
 <!DOCTYPE html>
 <html lang="it" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SafeSchool Hub <?= $isGuest ? '— Ospite' : '' ?></title>
-<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+<title>SafeSchool Hub<?= $isGuest ? ' — Ospite' : '' ?></title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#f7f6f2;--surface:#ffffff;--surface2:#f3f0ec;
-  --border:#dcd9d5;--text:#28251d;--muted:#7a7974;--faint:#bab9b4;
-  --primary:#01696f;--primary-h:#0c4e54;--primary-bg:color-mix(in oklab,#01696f 10%,transparent);
-  --error:#a12c7b;--warn:#d19900;--warn-bg:color-mix(in oklab,#d19900 10%,transparent);
-  --success:#437a22;
-  --radius:0.5rem;--shadow:0 4px 24px rgba(0,0,0,.08);
-  --font:'Satoshi',system-ui,sans-serif;
+/* ===== TOKENS ===== */
+:root,[data-theme="light"]{
+  --bg:#f5f4f0;
+  --surface:#ffffff;
+  --surface2:#f8f7f4;
+  --surface3:#f0ede8;
+  --border:rgba(40,37,29,.1);
+  --border2:rgba(40,37,29,.06);
+  --text:#1a1814;
+  --text-muted:#6b6860;
+  --text-faint:#aeaca6;
+  --primary:#016469;
+  --primary-hover:#024d51;
+  --primary-bg:rgba(1,100,105,.08);
+  --primary-light:rgba(1,100,105,.14);
+  --warn:#b07d00;
+  --warn-bg:rgba(176,125,0,.09);
+  --error:#a12c7b;
+  --error-bg:rgba(161,44,123,.08);
+  --success:#3a7220;
+  --success-bg:rgba(58,114,32,.08);
+  --radius:6px;
+  --radius-lg:10px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.04);
+  --font:'Inter',system-ui,sans-serif;
+  --nav-h:56px;
 }
 [data-theme="dark"]{
-  --bg:#171614;--surface:#1c1b19;--surface2:#201f1d;
-  --border:#393836;--text:#cdccca;--muted:#797876;--faint:#5a5957;
-  --primary:#4f98a3;--primary-h:#227f8b;--primary-bg:color-mix(in oklab,#4f98a3 12%,transparent);
-  --error:#d163a7;--warn:#e8af34;--warn-bg:color-mix(in oklab,#e8af34 12%,transparent);
-  --success:#6daa45;
-  --shadow:0 4px 24px rgba(0,0,0,.35);
+  --bg:#141312;
+  --surface:#1b1a18;
+  --surface2:#1f1e1c;
+  --surface3:#252320;
+  --border:rgba(255,255,255,.09);
+  --border2:rgba(255,255,255,.05);
+  --text:#d8d6d2;
+  --text-muted:#7a7874;
+  --text-faint:#4e4d4b;
+  --primary:#4a9298;
+  --primary-hover:#3a7f85;
+  --primary-bg:rgba(74,146,152,.1);
+  --primary-light:rgba(74,146,152,.18);
+  --warn:#d4a017;
+  --warn-bg:rgba(212,160,23,.1);
+  --error:#c45fa0;
+  --error-bg:rgba(196,95,160,.1);
+  --success:#5ea83a;
+  --success-bg:rgba(94,168,58,.1);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.25);
+  --shadow-md:0 4px 16px rgba(0,0,0,.35);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-font-smoothing:antialiased}
-body{min-height:100dvh;background:var(--bg);color:var(--text);font-family:var(--font);font-size:1rem}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;background:var(--bg);color:var(--text);font-family:var(--font);font-size:.9375rem;line-height:1.6}
+img,svg{display:block}
 
-/* ---- NAV ---- */
-.nav{display:flex;align-items:center;justify-content:space-between;
-  padding:.9rem 1.5rem;background:var(--surface);border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:100;gap:1rem}
-.nav-logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:1rem;color:var(--text);text-decoration:none}
-.nav-logo svg{color:var(--primary)}
-.nav-right{display:flex;align-items:center;gap:.6rem}
-.badge-guest{font-size:.72rem;font-weight:600;padding:.2rem .6rem;border-radius:99px;
-  background:var(--warn-bg);color:var(--warn);border:1px solid color-mix(in oklab,var(--warn) 25%,transparent);
-  white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:.5rem 1rem;border-radius:var(--radius);font-size:.85rem;font-weight:600;
-  cursor:pointer;border:none;font-family:inherit;transition:background .18s,opacity .18s;text-decoration:none}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-primary:hover{background:var(--primary-h)}
-.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
-.btn-ghost:hover{color:var(--text);border-color:color-mix(in oklab,var(--text) 30%,transparent)}
-.btn-sm{padding:.38rem .75rem;font-size:.8rem}
-
-/* ---- BANNER ---- */
-.banner{
-  display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;
-  padding:.85rem 1.5rem;background:var(--warn-bg);
-  border-bottom:1px solid color-mix(in oklab,var(--warn) 25%,transparent);
-  font-size:.86rem;color:var(--text)
+/* ===== NAV ===== */
+.nav{
+  position:sticky;top:0;z-index:200;
+  height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.25rem;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  gap:1rem;
 }
-.banner svg{color:var(--warn);flex-shrink:0}
-.banner strong{color:var(--warn)}
-.banner-actions{display:flex;gap:.5rem;margin-left:auto}
+.nav-brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--text);font-weight:700;font-size:.95rem;flex-shrink:0}
+.brand-icon{width:30px;height:30px;flex-shrink:0}
+.nav-center{flex:1;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
+.nav-center::-webkit-scrollbar{display:none}
+.nav-tab{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:.35rem .75rem;border-radius:var(--radius);
+  font-size:.82rem;font-weight:500;color:var(--text-muted);
+  cursor:pointer;border:none;background:transparent;font-family:inherit;
+  white-space:nowrap;transition:background .15s,color .15s;
+  text-decoration:none;
+}
+.nav-tab:hover{background:var(--surface3);color:var(--text)}
+.nav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:600}
+.nav-right{display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.badge-guest{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:.72rem;font-weight:600;padding:.2rem .55rem;border-radius:99px;
+  background:var(--warn-bg);color:var(--warn);
+  border:1px solid rgba(176,125,0,.2);
+  white-space:nowrap;
+}
+.icon-btn{
+  width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;
+  cursor:pointer;border:1px solid var(--border);background:var(--surface);
+  color:var(--text-muted);transition:background .15s,color .15s;
+}
+.icon-btn:hover{background:var(--surface3);color:var(--text)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:.45rem 1rem;border-radius:var(--radius);
+  font-size:.82rem;font-weight:600;cursor:pointer;
+  border:1px solid transparent;font-family:inherit;
+  transition:background .15s,border-color .15s,color .15s;
+  text-decoration:none;white-space:nowrap;
+}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-hover);border-color:var(--primary-hover)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--text-muted);border-color:var(--border)}
+.btn-ghost:hover{background:var(--surface3);color:var(--text)}
+.btn-sm{padding:.32rem .7rem;font-size:.78rem}
+.btn-danger{background:var(--error-bg);color:var(--error);border-color:var(--error-bg)}
+.btn-danger:hover{border-color:var(--error)}
 
-/* ---- LAYOUT ---- */
-.main{max-width:900px;margin:0 auto;padding:2rem 1.5rem;display:grid;gap:1.75rem}
+/* ===== BANNER OSPITE ===== */
+.guest-banner{
+  display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;
+  padding:.75rem 1.25rem;
+  background:var(--warn-bg);
+  border-bottom:1px solid rgba(176,125,0,.15);
+  font-size:.82rem;color:var(--text);
+}
+.guest-banner-icon{color:var(--warn);flex-shrink:0}
+.guest-banner-text strong{color:var(--warn)}
+.guest-banner-actions{display:flex;gap:.4rem;margin-left:auto;flex-wrap:wrap}
 
-/* ---- CARDS / SECTIONS ---- */
-.section{background:var(--surface);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);overflow:hidden}
-.section-header{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.7rem}
-.section-header svg{color:var(--primary)}
-.section-title{font-size:1rem;font-weight:700}
-.section-body{padding:1.25rem 1.4rem}
+/* ===== LAYOUT ===== */
+.page-wrap{max-width:960px;margin:0 auto;padding:1.5rem 1.25rem;display:flex;flex-direction:column;gap:1.25rem}
 
-/* ---- FORM SEGNALAZIONE ---- */
-.field{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.9rem}
-label{font-size:.79rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-input,select,textarea{padding:.55rem .75rem;border:1px solid var(--border);border-radius:var(--radius);
-  background:var(--bg);color:var(--text);font-size:.93rem;font-family:inherit;
-  transition:border .18s,box-shadow .18s;resize:vertical}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);
-  box-shadow:0 0 0 3px color-mix(in oklab,var(--primary) 18%,transparent)}
-textarea{min-height:90px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
-.submit-row{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-top:.3rem}
-.anon-check{display:flex;align-items:center;gap:.4rem;font-size:.83rem;color:var(--muted);cursor:pointer}
-.anon-check input{width:auto;padding:0}
-.msg{padding:.6rem .85rem;border-radius:var(--radius);font-size:.84rem;margin-top:.6rem}
-.msg.err{background:color-mix(in oklab,var(--error) 12%,transparent);color:var(--error)}
-.msg.ok{background:color-mix(in oklab,var(--primary) 12%,transparent);color:var(--primary)}
-.tracking-box{display:inline-flex;align-items:center;gap:.6rem;background:var(--surface2);
-  border:1px solid var(--border);border-radius:var(--radius);padding:.5rem .9rem;margin-top:.5rem}
-.tracking-code{font-family:monospace;font-size:1.05rem;font-weight:700;letter-spacing:.08em;color:var(--primary)}
+/* ===== SECTION VIEWS ===== */
+.view{display:none;flex-direction:column;gap:1.25rem}
+.view.active{display:flex}
 
-/* ---- REPORTS LIST ---- */
-.reports-list{display:flex;flex-direction:column;gap:.6rem}
-.report-item{display:flex;align-items:flex-start;gap:.9rem;padding:.8rem;border-radius:var(--radius);
-  background:var(--surface2);border:1px solid var(--border)}
-.report-item-body{flex:1;min-width:0}
-.report-item-title{font-weight:600;font-size:.93rem;margin-bottom:.2rem;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.report-item-meta{font-size:.78rem;color:var(--muted);display:flex;gap:.7rem;flex-wrap:wrap}
-.pill{display:inline-block;padding:.15rem .55rem;border-radius:99px;font-size:.72rem;font-weight:600}
-.pill-alta{background:color-mix(in oklab,var(--error) 14%,transparent);color:var(--error)}
+/* ===== CARD ===== */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+}
+.card-header{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.9rem 1.1rem;
+  border-bottom:1px solid var(--border);
+}
+.card-header-icon{color:var(--primary);flex-shrink:0}
+.card-title{font-size:.88rem;font-weight:700;flex:1}
+.card-badge{
+  font-size:.7rem;font-weight:600;padding:.15rem .5rem;border-radius:99px;
+  margin-left:auto;
+}
+.badge-warn{background:var(--warn-bg);color:var(--warn)}
+.badge-primary{background:var(--primary-bg);color:var(--primary)}
+.badge-success{background:var(--success-bg);color:var(--success)}
+.badge-error{background:var(--error-bg);color:var(--error)}
+.card-body{padding:1.1rem}
+
+/* ===== FORM ===== */
+.field{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.85rem}
+.field:last-child{margin-bottom:0}
+fieldset{border:none;padding:0}
+.field-label{
+  font-size:.75rem;font-weight:600;
+  color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;
+}
+.field-input{
+  padding:.5rem .7rem;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:var(--surface2);
+  color:var(--text);
+  font-size:.88rem;
+  font-family:inherit;
+  transition:border .15s,box-shadow .15s;
+}
+.field-input:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px var(--primary-bg);
+}
+textarea.field-input{min-height:80px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-row{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-top:.5rem}
+.check-label{display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--text-muted);cursor:pointer}
+.check-label input[type=checkbox]{accent-color:var(--primary);cursor:pointer}
+.msg{padding:.55rem .8rem;border-radius:var(--radius);font-size:.82rem;margin-top:.6rem;display:none}
+.msg.visible{display:block}
+.msg-ok{background:var(--success-bg);color:var(--success)}
+.msg-err{background:var(--error-bg);color:var(--error)}
+.tracking-chip{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:.3rem .7rem;margin-top:.4rem;
+}
+.tracking-code{font-family:'Courier New',monospace;font-size:.95rem;font-weight:700;letter-spacing:.08em;color:var(--primary)}
+
+/* ===== REPORTS LIST ===== */
+.reports-stack{display:flex;flex-direction:column;gap:.5rem}
+.report-row{
+  display:flex;align-items:flex-start;gap:.75rem;
+  padding:.75rem .85rem;
+  border-radius:var(--radius);
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  transition:border-color .15s;
+}
+.report-row:hover{border-color:var(--border)}
+.report-row-body{flex:1;min-width:0}
+.report-row-title{font-weight:600;font-size:.88rem;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.report-row-meta{display:flex;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:var(--text-muted)}
+.pill{display:inline-block;padding:.12rem .45rem;border-radius:99px;font-size:.7rem;font-weight:600}
+.pill-alta{background:var(--error-bg);color:var(--error)}
 .pill-media{background:var(--warn-bg);color:var(--warn)}
-.pill-bassa{background:color-mix(in oklab,var(--success) 12%,transparent);color:var(--success)}
+.pill-bassa{background:var(--success-bg);color:var(--success)}
 .pill-status{background:var(--primary-bg);color:var(--primary)}
-.empty-state{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
-.empty-state svg{margin:0 auto .75rem;color:var(--faint)}
-
-/* ---- LOCKED SECTIONS ---- */
-.locked-wrap{position:relative}
-.locked-overlay{
-  position:absolute;inset:0;z-index:10;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;
-  background:color-mix(in oklab,var(--bg) 75%,transparent);
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  padding:2rem;text-align:center;
-  border-radius:calc(var(--radius)*1.5)
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  padding:2.5rem 1rem;text-align:center;
+  color:var(--text-muted);gap:.5rem;
 }
-.locked-overlay svg{color:var(--faint)}
-.locked-overlay p{font-size:.9rem;color:var(--muted);max-width:26ch}
-.locked-preview{opacity:.35;pointer-events:none;user-select:none;filter:blur(1px)}
+.empty-state-icon{color:var(--text-faint);margin-bottom:.25rem}
+.empty-state p{font-size:.85rem;max-width:28ch}
 
-/* ---- FAKE VAULT ROWS (preview) ---- */
-.vault-row{display:flex;align-items:center;gap:.9rem;padding:.7rem .9rem;
-  border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border)}
-.vault-icon{width:32px;height:32px;border-radius:var(--radius);background:var(--primary-bg);
-  display:grid;place-items:center;flex-shrink:0}
-.vault-info{flex:1;min-width:0}
-.vault-site{font-weight:600;font-size:.9rem}
-.vault-user{font-size:.78rem;color:var(--muted)}
-.vault-pw{font-family:monospace;font-size:.85rem;letter-spacing:.12em;color:var(--faint)}
+/* ===== SICUREZZA DIGITALE ===== */
+.sec-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.sec-tab{
+  padding:.3rem .75rem;border-radius:99px;
+  font-size:.78rem;font-weight:600;
+  cursor:pointer;border:1px solid var(--border);
+  background:transparent;color:var(--text-muted);
+  font-family:inherit;transition:background .15s,color .15s,border-color .15s;
+}
+.sec-tab:hover{background:var(--surface3)}
+.sec-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.sec-panel{display:none;flex-direction:column;gap:.85rem}
+.sec-panel.active{display:flex}
+.tip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem}
+.tip-card{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:var(--radius);
+  padding:.85rem;
+}
+.tip-card-icon{font-size:1.3rem;margin-bottom:.4rem}
+.tip-card-title{font-size:.82rem;font-weight:700;margin-bottom:.25rem}
+.tip-card-desc{font-size:.78rem;color:var(--text-muted);line-height:1.45}
+.alert-box{
+  display:flex;gap:.7rem;align-items:flex-start;
+  padding:.75rem .9rem;
+  border-radius:var(--radius);
+  font-size:.82rem;
+}
+.alert-warn{background:var(--warn-bg);color:var(--text);border:1px solid rgba(176,125,0,.18)}
+.alert-info{background:var(--primary-bg);color:var(--text);border:1px solid var(--primary-light)}
+.alert-success{background:var(--success-bg);color:var(--text);border:1px solid rgba(58,114,32,.2)}
+.alert-icon{flex-shrink:0;margin-top:.05rem}
+.strength-bar{height:6px;border-radius:99px;background:var(--surface3);overflow:hidden;margin:.4rem 0}
+.strength-fill{height:100%;border-radius:99px;transition:width .3s,background .3s}
+.strength-label{font-size:.75rem;font-weight:600}
+.checklist{display:flex;flex-direction:column;gap:.35rem}
+.checklist-item{display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--text-muted)}
+.checklist-item.ok{color:var(--success)}
+.checklist-item.fail{color:var(--error)}
+.checklist-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.quiz-wrap{display:flex;flex-direction:column;gap:.7rem}
+.quiz-question{font-size:.9rem;font-weight:600;margin-bottom:.2rem}
+.quiz-options{display:flex;flex-direction:column;gap:.4rem}
+.quiz-opt{
+  padding:.5rem .75rem;border-radius:var(--radius);
+  border:1px solid var(--border);background:var(--surface2);
+  font-size:.83rem;cursor:pointer;text-align:left;
+  font-family:inherit;color:var(--text);
+  transition:background .15s,border-color .15s;
+}
+.quiz-opt:hover{border-color:var(--primary);background:var(--primary-bg)}
+.quiz-opt.correct{background:var(--success-bg);border-color:var(--success);color:var(--success)}
+.quiz-opt.wrong{background:var(--error-bg);border-color:var(--error);color:var(--error)}
+.quiz-feedback{font-size:.82rem;padding:.5rem .75rem;border-radius:var(--radius);display:none}
+.quiz-feedback.visible{display:block}
+.privacy-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.privacy-table th,.privacy-table td{padding:.5rem .7rem;border:1px solid var(--border);text-align:left}
+.privacy-table th{background:var(--surface3);font-weight:600;color:var(--text-muted)}
+.privacy-table tr:nth-child(even) td{background:var(--surface2)}
 
-/* ---- THEME BTN ---- */
-.theme-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;
-  width:34px;height:34px;display:grid;place-items:center;cursor:pointer;color:var(--muted);
-  transition:background .18s;flex-shrink:0}
-.theme-btn:hover{background:var(--border)}
+/* ===== DIVIDER ===== */
+.divider{height:1px;background:var(--border);margin:.25rem 0}
 
-@media(max-width:600px){
-  .form-row{grid-template-columns:1fr}
-  .nav{padding:.75rem 1rem}
-  .main{padding:1.25rem 1rem}
-  .banner{padding:.75rem 1rem}
-  .banner-actions{margin-left:0;width:100%}
+/* ===== SCROLL TOP BTN ===== */
+.fab{
+  position:fixed;bottom:1.5rem;right:1.5rem;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--primary);color:#fff;
+  display:grid;place-items:center;
+  cursor:pointer;border:none;
+  box-shadow:var(--shadow-md);
+  opacity:0;pointer-events:none;
+  transition:opacity .2s;
+  z-index:100;
+}
+.fab.visible{opacity:1;pointer-events:all}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:640px){
+  .form-grid{grid-template-columns:1fr}
+  .nav-center{display:none}
+  .page-wrap{padding:1rem .9rem}
+  .guest-banner{padding:.65rem .9rem}
+  .guest-banner-actions{margin-left:0;width:100%}
+  .tip-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){
+  .tip-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -154,291 +333,552 @@ textarea{min-height:90px}
 
 <!-- NAV -->
 <nav class="nav">
-  <a href="guest.php" class="nav-logo">
-    <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-      <rect x="2" y="2" width="28" height="28" rx="7" fill="var(--primary)" opacity=".12"/>
-      <path d="M16 6 L26 10 L26 18 C26 23 21 27 16 29 C11 27 6 23 6 18 L6 10 Z" fill="var(--primary)" opacity=".25"/>
-      <path d="M16 8 L24 11.5 L24 18 C24 22 20 25.5 16 27.5 C12 25.5 8 22 8 18 L8 11.5 Z" stroke="var(--primary)" stroke-width="1.5" fill="none"/>
-      <path d="M12 16 L15 19 L20 13" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <a href="guest.php" class="nav-brand">
+    <svg class="brand-icon" viewBox="0 0 30 30" fill="none">
+      <rect width="30" height="30" rx="7" fill="var(--primary)" opacity=".12"/>
+      <path d="M15 4L24 8v8c0 5-4.5 8.5-9 10.5C5.5 24.5 1 21 1 16V8l9-4z" fill="var(--primary)" opacity=".2"/>
+      <path d="M15 5.5L23 9v7c0 4.5-4 7.8-8 9.8-4-2-8-5.3-8-9.8V9l8-3.5z" stroke="var(--primary)" stroke-width="1.4" fill="none"/>
+      <path d="M11 15l3 3 5-6" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     SafeSchool Hub
   </a>
+
+  <div class="nav-center" role="tablist" aria-label="Navigazione sezioni">
+    <button class="nav-tab active" role="tab" data-view="segnalazioni" onclick="switchView('segnalazioni',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+      Segnalazioni
+    </button>
+    <button class="nav-tab" role="tab" data-view="sicurezza" onclick="switchView('sicurezza',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Sicurezza digitale
+    </button>
+    <?php if(!$isGuest): ?>
+    <button class="nav-tab" role="tab" data-view="vault" onclick="switchView('vault',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Vault password
+    </button>
+    <?php endif; ?>
+    <?php if($isAdmin): ?>
+    <button class="nav-tab" role="tab" data-view="admin" onclick="switchView('admin',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Admin
+    </button>
+    <?php endif; ?>
+  </div>
+
   <div class="nav-right">
     <?php if($isGuest): ?>
     <span class="badge-guest">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block;vertical-align:middle;margin-right:3px">
-        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-      </svg>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       Ospite
     </span>
     <?php endif; ?>
-    <button class="theme-btn" id="themeBtn" aria-label="Cambia tema">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon">
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-      </svg>
+    <button class="icon-btn" id="themeBtn" aria-label="Cambia tema">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     </button>
     <a href="logout.php" class="btn btn-ghost btn-sm">Esci</a>
   </div>
 </nav>
 
 <?php if($isGuest): ?>
-<!-- BANNER OSPITE -->
-<div class="banner">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/>
-  </svg>
-  <span><strong>Modalità ospite</strong> — Puoi inviare segnalazioni anonime.
-  Registrati per accedere a Vault password, storico segnalazioni e altro.</span>
-  <div class="banner-actions">
+<div class="guest-banner" role="alert">
+  <svg class="guest-banner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
+  <span class="guest-banner-text"><strong>Modalità ospite</strong> — Puoi inviare segnalazioni anonime e consultare la guida alla sicurezza digitale. Registrati per sbloccare tutte le funzionalità.</span>
+  <div class="guest-banner-actions">
     <a href="register.php" class="btn btn-primary btn-sm">Crea account</a>
     <a href="login.php" class="btn btn-ghost btn-sm">Accedi</a>
   </div>
 </div>
 <?php endif; ?>
 
-<main class="main">
+<div class="page-wrap">
 
-  <!-- NUOVA SEGNALAZIONE -->
-  <div class="section">
-    <div class="section-header">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-        <line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/>
-      </svg>
-      <span class="section-title">Nuova segnalazione</span>
-    </div>
-    <div class="section-body">
-      <form id="reportForm">
-        <div class="form-row">
-          <div class="field">
-            <label for="r-title">Titolo *</label>
-            <input id="r-title" type="text" placeholder="Es. Bullismo in corridoio" required>
-          </div>
-          <div class="field">
-            <label for="r-category">Categoria</label>
-            <select id="r-category">
-              <option>Bullismo</option>
-              <option>Sicurezza</option>
-              <option>Strutture</option>
-              <option>Comportamento</option>
-              <option selected>Altro</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label for="r-desc">Descrizione *</label>
-          <textarea id="r-desc" placeholder="Descrivi la situazione nel dettaglio…" required></textarea>
-        </div>
-        <div class="form-row">
-          <div class="field">
-            <label for="r-priority">Priorità</label>
-            <select id="r-priority">
-              <option>Bassa</option>
-              <option selected>Media</option>
-              <option>Alta</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="r-name">Il tuo nome</label>
-            <input id="r-name" type="text" placeholder="Lascia vuoto per rimanere anonimo">
-          </div>
-        </div>
-        <div class="submit-row">
-          <button class="btn btn-primary" type="submit" id="reportSubmit">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-            Invia segnalazione
-          </button>
-          <label class="anon-check">
-            <input type="checkbox" id="r-anon"> Invia come anonimo
-          </label>
-        </div>
-        <div id="reportMsg"></div>
-      </form>
-    </div>
-  </div>
+  <!-- ========== SEGNALAZIONI ========== -->
+  <div id="view-segnalazioni" class="view active">
 
-  <!-- ULTIME SEGNALAZIONI PUBBLICHE -->
-  <div class="section">
-    <div class="section-header">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-        <polyline points="10 9 9 9 8 9"/>
-      </svg>
-      <span class="section-title">Ultime segnalazioni</span>
-    </div>
-    <div class="section-body">
-      <div id="reportsList"><div class="empty-state">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/>
-        </svg>
-        <p>Caricamento…</p>
-      </div></div>
-    </div>
-  </div>
-
-  <!-- VAULT PASSWORD (bloccato per ospiti) -->
-  <div class="section">
-    <div class="section-header">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="11" width="18" height="11" rx="2"/>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-      <span class="section-title">Vault password</span>
-      <?php if($isGuest): ?>
-      <span class="pill" style="background:var(--warn-bg);color:var(--warn);margin-left:auto;font-size:.72rem;font-weight:600;padding:.15rem .55rem;border-radius:99px">Solo per registrati</span>
-      <?php endif; ?>
-    </div>
-    <div class="section-body <?= $isGuest ? 'locked-wrap' : '' ?>">
-      <?php if($isGuest): ?>
-      <div class="locked-overlay">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="3" y="11" width="18" height="11" rx="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <p>Crea un account gratuito per salvare e cifrare le tue password</p>
-        <a href="register.php" class="btn btn-primary btn-sm">Registrati gratis</a>
+    <!-- NUOVA SEGNALAZIONE -->
+    <div class="card">
+      <div class="card-header">
+        <svg class="card-header-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+        <span class="card-title">Nuova segnalazione</span>
+        <span class="card-badge badge-primary">Anonima consentita</span>
       </div>
-      <!-- Preview sfocata -->
-      <div class="locked-preview" style="display:flex;flex-direction:column;gap:.5rem">
-        <div class="vault-row">
-          <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
-          <div class="vault-info"><div class="vault-site">Google</div><div class="vault-user">mario.rossi@gmail.com</div></div>
-          <div class="vault-pw">••••••••••••</div>
-        </div>
-        <div class="vault-row">
-          <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/></svg></div>
-          <div class="vault-info"><div class="vault-site">Registro Elettronico</div><div class="vault-user">m.rossi</div></div>
-          <div class="vault-pw">••••••••••••</div>
-        </div>
-        <div class="vault-row">
-          <div class="vault-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
-          <div class="vault-info"><div class="vault-site">GitHub</div><div class="vault-user">mrossi_dev</div></div>
-          <div class="vault-pw">••••••••••••</div>
+      <div class="card-body">
+        <form id="reportForm" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="r-title">Titolo *</label>
+              <input class="field-input" id="r-title" type="text" placeholder="Es. Bullismo in corridoio" required>
+            </div>
+            <div class="field">
+              <label class="field-label" for="r-category">Categoria</label>
+              <select class="field-input" id="r-category">
+                <option>Bullismo</option>
+                <option>Sicurezza</option>
+                <option>Strutture</option>
+                <option>Comportamento</option>
+                <option selected>Altro</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="r-desc">Descrizione *</label>
+            <textarea class="field-input" id="r-desc" placeholder="Descrivi la situazione nel dettaglio…" required></textarea>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="r-priority">Priorità</label>
+              <select class="field-input" id="r-priority">
+                <option>Bassa</option>
+                <option selected>Media</option>
+                <option>Alta</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label" for="r-name">Il tuo nome <span style="font-weight:400;text-transform:none;letter-spacing:0">(opzionale)</span></label>
+              <input class="field-input" id="r-name" type="text" placeholder="Lascia vuoto per rimanere anonimo">
+            </div>
+          </div>
+          <div class="form-row">
+            <button class="btn btn-primary" type="submit" id="reportSubmit">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Invia segnalazione
+            </button>
+            <label class="check-label">
+              <input type="checkbox" id="r-anon"> Invia come anonimo
+            </label>
+          </div>
+          <div class="msg" id="reportMsg" role="status"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- LISTA SEGNALAZIONI -->
+    <div class="card">
+      <div class="card-header">
+        <svg class="card-header-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="card-title">Segnalazioni recenti</span>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="loadReports()" aria-label="Aggiorna lista">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.49"/></svg>
+          Aggiorna
+        </button>
+      </div>
+      <div class="card-body">
+        <div id="reportsList">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
+            </div>
+            <p>Caricamento in corso…</p>
+          </div>
         </div>
       </div>
-      <?php else: ?>
-      <p style="color:var(--muted);font-size:.9rem">Accedi alla dashboard completa per gestire il vault.</p>
-      <?php endif; ?>
     </div>
-  </div>
 
-  <!-- PANNELLO ADMIN: visibile SOLO agli admin, mai agli ospiti -->
-  <?php if($isAdmin): ?>
-  <div class="section">
-    <div class="section-header">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      </svg>
-      <span class="section-title">Pannello amministratore</span>
-    </div>
-    <div class="section-body">
-      <p style="color:var(--muted);font-size:.9rem">Benvenuto, amministratore. Gestisci le segnalazioni dal pannello completo.</p>
+  </div><!-- /view-segnalazioni -->
+
+  <!-- ========== SICUREZZA DIGITALE ========== -->
+  <div id="view-sicurezza" class="view">
+    <div class="card">
+      <div class="card-header">
+        <svg class="card-header-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span class="card-title">Centro sicurezza digitale</span>
+        <span class="card-badge badge-success">Gratuito per tutti</span>
+      </div>
+      <div class="card-body">
+
+        <!-- Sotto-tab sicurezza -->
+        <div class="sec-tabs" role="tablist" aria-label="Argomenti sicurezza">
+          <button class="sec-tab active" role="tab" onclick="switchSecTab('password',this)">🔑 Password</button>
+          <button class="sec-tab" role="tab" onclick="switchSecTab('phishing',this)">🎣 Phishing</button>
+          <button class="sec-tab" role="tab" onclick="switchSecTab('2fa',this)">🔐 2FA</button>
+          <button class="sec-tab" role="tab" onclick="switchSecTab('privacy',this)">👁️ Privacy online</button>
+          <button class="sec-tab" role="tab" onclick="switchSecTab('quiz',this)">🎯 Test</button>
+        </div>
+
+        <!-- PASSWORD -->
+        <div id="sectab-password" class="sec-panel active">
+          <div class="alert-box alert-info">
+            <svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Una password robusta è la prima linea di difesa del tuo account. Testa la tua qui sotto.</span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="pw-test">Inserisci una password da testare</label>
+            <input class="field-input" id="pw-test" type="password" placeholder="Scrivi una password…" autocomplete="off" oninput="checkPassword(this.value)">
+            <div class="strength-bar"><div class="strength-fill" id="strength-fill" style="width:0%;background:var(--error)"></div></div>
+            <span class="strength-label" id="strength-label" style="color:var(--text-faint)">Inserisci una password</span>
+          </div>
+          <div class="checklist" id="pw-checklist">
+            <div class="checklist-item" id="chk-len"><span class="checklist-dot"></span> Almeno 12 caratteri</div>
+            <div class="checklist-item" id="chk-upper"><span class="checklist-dot"></span> Una lettera maiuscola</div>
+            <div class="checklist-item" id="chk-lower"><span class="checklist-dot"></span> Una lettera minuscola</div>
+            <div class="checklist-item" id="chk-num"><span class="checklist-dot"></span> Un numero</div>
+            <div class="checklist-item" id="chk-sym"><span class="checklist-dot"></span> Un simbolo speciale (!@#$…)</div>
+          </div>
+          <div class="divider"></div>
+          <p style="font-size:.82rem;font-weight:700;margin-bottom:.5rem">Consigli pratici</p>
+          <div class="tip-grid">
+            <div class="tip-card"><div class="tip-card-icon">📏</div><div class="tip-card-title">Lunghezza > Complessità</div><div class="tip-card-desc">Una frase lunga come «CoffeIn@Mattino2024!» è più sicura di «x$8Q».</div></div>
+            <div class="tip-card"><div class="tip-card-icon">🔄</div><div class="tip-card-title">Unica per ogni sito</div><div class="tip-card-desc">Non riutilizzare mai la stessa password su più piattaforme.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">🗝️</div><div class="tip-card-title">Usa un password manager</div><div class="tip-card-desc">Bitwarden o KeePass generano e memorizzano password sicure per te.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">🚫</div><div class="tip-card-title">Evita dati personali</div><div class="tip-card-desc">Nome, data di nascita, numero di telefono sono facilmente indovinabili.</div></div>
+          </div>
+        </div>
+
+        <!-- PHISHING -->
+        <div id="sectab-phishing" class="sec-panel">
+          <div class="alert-box alert-warn">
+            <svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+            <span>Il phishing è la causa del <strong>90% delle violazioni informatiche</strong>. Impara a riconoscerlo.</span>
+          </div>
+          <div class="tip-grid">
+            <div class="tip-card"><div class="tip-card-icon">📧</div><div class="tip-card-title">Mittente sospetto</div><div class="tip-card-desc">Controlla sempre l'indirizzo completo: «noreply@goog1e.com» non è Google.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">⚡</div><div class="tip-card-title">Urgenza artificiale</div><div class="tip-card-desc">«Il tuo account verrà disattivato tra 24 ore!» è un classico segnale di allarme.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">🔗</div><div class="tip-card-title">Link ingannevoli</div><div class="tip-card-desc">Passa il mouse sul link prima di cliccare: l'URL reale appare in basso nel browser.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">📎</div><div class="tip-card-title">Allegati pericolosi</div><div class="tip-card-desc">Non aprire .exe, .zip o .docm da mittenti sconosciuti senza verifica.</div></div>
+          </div>
+          <div class="divider"></div>
+          <p style="font-size:.82rem;font-weight:700;margin-bottom:.5rem">Come verificare un'email sospetta</p>
+          <div class="checklist">
+            <div class="checklist-item"><span class="checklist-dot"></span> Controlla il dominio mittente (non solo il nome visualizzato)</div>
+            <div class="checklist-item"><span class="checklist-dot"></span> Non cliccare link: vai direttamente al sito ufficiale</div>
+            <div class="checklist-item"><span class="checklist-dot"></span> Segnala l'email come phishing al provider</div>
+            <div class="checklist-item"><span class="checklist-dot"></span> Se riguarda la scuola, avvisa il referente IT</div>
+          </div>
+        </div>
+
+        <!-- 2FA -->
+        <div id="sectab-2fa" class="sec-panel">
+          <div class="alert-box alert-success">
+            <svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>L'autenticazione a due fattori blocca il <strong>99,9% degli attacchi automatici</strong> agli account.</span>
+          </div>
+          <div class="tip-grid">
+            <div class="tip-card"><div class="tip-card-icon">📱</div><div class="tip-card-title">App Authenticator</div><div class="tip-card-desc">Google Authenticator o Authy generano codici temporanei sicuri, meglio dell'SMS.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">🔑</div><div class="tip-card-title">Chiavi hardware</div><div class="tip-card-desc">YubiKey è la soluzione più sicura: un dispositivo fisico USB da inserire al login.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">📲</div><div class="tip-card-title">Codici SMS</div><div class="tip-card-desc">Meno sicuri delle app (SIM swap), ma comunque molto meglio di nessun 2FA.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">💾</div><div class="tip-card-title">Codici di backup</div><div class="tip-card-desc">Salva sempre i codici di ripristino in un posto sicuro offline quando attivi il 2FA.</div></div>
+          </div>
+          <div class="divider"></div>
+          <p style="font-size:.82rem;font-weight:700;margin-bottom:.5rem">Dove attivare il 2FA subito</p>
+          <div class="checklist">
+            <div class="checklist-item"><span class="checklist-dot" style="background:var(--success)"></span> Account Google / Gmail</div>
+            <div class="checklist-item"><span class="checklist-dot" style="background:var(--success)"></span> Instagram e Facebook</div>
+            <div class="checklist-item"><span class="checklist-dot" style="background:var(--success)"></span> Account Microsoft / Teams</div>
+            <div class="checklist-item"><span class="checklist-dot" style="background:var(--success)"></span> GitHub e ambienti di sviluppo</div>
+            <div class="checklist-item"><span class="checklist-dot" style="background:var(--success)"></span> Password manager (priorità assoluta!)</div>
+          </div>
+        </div>
+
+        <!-- PRIVACY -->
+        <div id="sectab-privacy" class="sec-panel">
+          <div class="alert-box alert-info">
+            <svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>I tuoi dati personali online valgono. Conoscere le impostazioni di privacy ti protegge.</span>
+          </div>
+          <table class="privacy-table">
+            <thead><tr><th>Piattaforma</th><th>Impostazione consigliata</th><th>Rischio se ignorata</th></tr></thead>
+            <tbody>
+              <tr><td>Instagram</td><td>Profilo privato + disattiva posizione</td><td>Stalking, furto identità</td></tr>
+              <tr><td>TikTok</td><td>Account privato + limita download</td><td>Raccolta dati intensiva</td></tr>
+              <tr><td>Google</td><td>Disattiva cronologia posizione e web</td><td>Profilazione commerciale</td></tr>
+              <tr><td>WhatsApp</td><td>Foto profilo solo contatti + 2FA attivo</td><td>Accesso da sconosciuti</td></tr>
+              <tr><td>Browser</td><td>Blocca cookie terze parti (Firefox/Brave)</td><td>Tracciamento cross-site</td></tr>
+            </tbody>
+          </table>
+          <div class="divider"></div>
+          <div class="tip-grid">
+            <div class="tip-card"><div class="tip-card-icon">🌐</div><div class="tip-card-title">VPN pubblica</div><div class="tip-card-desc">Usa una VPN quando ti connetti a reti Wi-Fi pubbliche (scuola, bar, stazione).</div></div>
+            <div class="tip-card"><div class="tip-card-icon">🍪</div><div class="tip-card-title">Gestisci i cookie</div><div class="tip-card-desc">Accetta solo i cookie necessari: quelli di marketing ti tracciano su tutti i siti.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">📍</div><div class="tip-card-title">Geolocalizzazione</div><div class="tip-card-desc">Concedi l'accesso alla posizione solo alle app che ne hanno realmente bisogno.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">🗑️</div><div class="tip-card-title">Digital footprint</div><div class="tip-card-desc">Elimina periodicamente account non usati: sono vettori di attacco silenziosi.</div></div>
+          </div>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="sectab-quiz" class="sec-panel">
+          <div class="alert-box alert-info">
+            <svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Metti alla prova le tue conoscenze sulla sicurezza digitale. Quante ne sai?</span>
+          </div>
+          <div id="quiz-wrap" class="quiz-wrap">
+            <!-- generato da JS -->
+          </div>
+          <div style="margin-top:.75rem">
+            <button class="btn btn-primary btn-sm" onclick="initQuiz()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.49"/></svg>
+              Ricomincia quiz
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /card-body -->
+    </div><!-- /card sicurezza -->
+  </div><!-- /view-sicurezza -->
+
+  <!-- ========== VAULT (solo utenti registrati) ========== -->
+  <?php if(!$isGuest): ?>
+  <div id="view-vault" class="view">
+    <div class="card">
+      <div class="card-header">
+        <svg class="card-header-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span class="card-title">Vault password personale</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:.85rem;color:var(--text-muted)">Le tue credenziali salvate appaiono qui. Gestisci il vault dalla dashboard completa.</p>
+      </div>
     </div>
   </div>
   <?php endif; ?>
 
-</main>
+  <!-- ========== ADMIN ========== -->
+  <?php if($isAdmin): ?>
+  <div id="view-admin" class="view">
+    <div class="card">
+      <div class="card-header">
+        <svg class="card-header-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="card-title">Pannello amministratore</span>
+        <span class="card-badge badge-error">Admin only</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:.85rem;color:var(--text-muted)">Benvenuto, amministratore. Gestisci utenti, segnalazioni e impostazioni dal pannello dedicato.</p>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+</div><!-- /page-wrap -->
+
+<!-- FAB scroll top -->
+<button class="fab" id="fabTop" aria-label="Torna su" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
 
 <script>
-// Theme toggle
+/* ===== THEME ===== */
 (function(){
-  var btn = document.getElementById('themeBtn');
+  var html = document.documentElement;
+  var btn  = document.getElementById('themeBtn');
   var icon = document.getElementById('themeIcon');
-  var d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', d);
+  var SUN  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  var MOON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  var theme = 'light'; // default chiaro
+  html.setAttribute('data-theme', theme);
   btn.addEventListener('click', function(){
-    d = d==='dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', d);
-    icon.innerHTML = d==='dark'
-      ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
-      : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    theme = theme === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', theme);
+    icon.innerHTML = theme === 'dark' ? MOON : SUN;
   });
 })();
 
-// Carica segnalazioni
-async function loadReports() {
-  try {
-    var r = await fetch('api.php?action=reports').then(x => x.json());
-    var list = document.getElementById('reportsList');
-    if (!r.ok || !r.reports.length) {
-      list.innerHTML = '<div class="empty-state"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Nessuna segnalazione ancora</p></div>';
-      return;
-    }
-    var prioClass = { Alta: 'pill-alta', Media: 'pill-media', Bassa: 'pill-bassa' };
-    list.innerHTML = '<div class="reports-list">' + r.reports.map(function(rep){
-      var date = new Date(rep.created_at).toLocaleDateString('it-IT');
-      return '<div class="report-item">'+
-        '<div class="report-item-body">'+
-          '<div class="report-item-title">' + escHtml(rep.title) + '</div>'+
-          '<div class="report-item-meta">'+
-            '<span>' + escHtml(rep.category) + '</span>'+
-            '<span class="pill ' + (prioClass[rep.priority]||'') + '">' + escHtml(rep.priority) + '</span>'+
-            '<span class="pill pill-status">' + escHtml(rep.status) + '</span>'+
-            '<span>' + date + '</span>'+
-            '<span style="color:var(--faint)">da ' + escHtml(rep.name) + '</span>'+
-          '</div>'+
-        '</div>'+
-      '</div>';
-    }).join('') + '</div>';
-  } catch(e) {
-    document.getElementById('reportsList').innerHTML = '<div class="empty-state"><p>Errore caricamento segnalazioni</p></div>';
-  }
+/* ===== VIEW SWITCHER ===== */
+function switchView(name, el) {
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  var v = document.getElementById('view-' + name);
+  if(v) v.classList.add('active');
+  if(el) el.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
+/* ===== SECURITY SUB-TABS ===== */
+function switchSecTab(name, el) {
+  document.querySelectorAll('.sec-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sec-tab').forEach(function(t){ t.classList.remove('active'); });
+  var p = document.getElementById('sectab-' + name);
+  if(p) p.classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+/* ===== PASSWORD STRENGTH ===== */
+function checkPassword(pw) {
+  var checks = {
+    len:   pw.length >= 12,
+    upper: /[A-Z]/.test(pw),
+    lower: /[a-z]/.test(pw),
+    num:   /[0-9]/.test(pw),
+    sym:   /[^A-Za-z0-9]/.test(pw)
+  };
+  Object.keys(checks).forEach(function(k){
+    var el = document.getElementById('chk-' + k);
+    if(!el) return;
+    el.classList.toggle('ok', checks[k]);
+    el.classList.toggle('fail', !checks[k] && pw.length > 0);
+  });
+  var score = Object.values(checks).filter(Boolean).length;
+  var fill  = document.getElementById('strength-fill');
+  var label = document.getElementById('strength-label');
+  if(pw.length === 0){ fill.style.width='0%'; label.textContent='Inserisci una password'; label.style.color='var(--text-faint)'; return; }
+  var colors = ['var(--error)','var(--error)','var(--warn)','var(--warn)','var(--success)'];
+  var labels = ['Molto debole','Debole','Sufficiente','Buona','Ottima'];
+  fill.style.width = (score * 20) + '%';
+  fill.style.background = colors[score - 1] || colors[0];
+  label.textContent = labels[score - 1] || labels[0];
+  label.style.color = colors[score - 1] || colors[0];
+}
+
+/* ===== QUIZ ===== */
+var quizData = [
+  { q: 'Qual è la password più sicura tra le seguenti?',
+    opts: ['password123','P@ssw0rd!2024#','mario1990','scuola'],
+    correct: 1,
+    feedback: 'Corretta! Una password lunga con simboli, numeri e maiuscole è la scelta migliore.' },
+  { q: 'Ricevi un\'email da «supporto@g00gle.com» che ti chiede di accedere al tuo account. Cosa fai?',
+    opts: ['Clicco subito sul link','Rispondo con le mie credenziali','Ignoro l\'email e vado direttamente su google.com','Inoltro a tutti gli amici'],
+    correct: 2,
+    feedback: 'Esatto! Non cliccare mai sui link nelle email sospette. Vai sempre direttamente al sito ufficiale.' },
+  { q: 'Cosa significa "2FA"?',
+    opts: ['2 fattori di attacco','Autenticazione a due fattori','2 file allegati','Second File Access'],
+    correct: 1,
+    feedback: 'Giusto! Il 2FA aggiunge un secondo livello di verifica oltre alla password.' },
+  { q: 'Su quale rete è più rischioso accedere al tuo account bancario?',
+    opts: ['Rete di casa','Wi-Fi della scuola con password','Wi-Fi pubblico senza password','Rete mobile 4G'],
+    correct: 2,
+    feedback: 'Corretto! Le reti Wi-Fi pubbliche non cifrate possono essere intercettate da malintenzionati.' },
+  { q: 'Quale strumento è consigliato per gestire password diverse per ogni sito?',
+    opts: ['Un foglio di carta','Lo stesso browser','Un password manager come Bitwarden','Un file .txt sul desktop'],
+    correct: 2,
+    feedback: 'Perfetto! Un password manager cifra e gestisce automaticamente credenziali uniche per ogni sito.' }
+];
+var quizState = { current: 0, score: 0, answered: false };
+
+function initQuiz() {
+  quizState = { current: 0, score: 0, answered: false };
+  renderQuestion();
+}
+
+function renderQuestion() {
+  var wrap = document.getElementById('quiz-wrap');
+  if(quizState.current >= quizData.length) {
+    wrap.innerHTML = '<div class="alert-box ' + (quizState.score >= 4 ? 'alert-success' : quizState.score >= 2 ? 'alert-info' : 'alert-warn') + '">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>'
+      + '<div><strong>Risultato: ' + quizState.score + '/' + quizData.length + '</strong><br>'
+      + (quizState.score === 5 ? 'Eccellente! Sei un esperto di sicurezza digitale.' : quizState.score >= 3 ? 'Buone conoscenze! Ripasssa qualche argomento.' : 'Continua a studiare la guida sopra.')
+      + '</div></div>';
+    return;
+  }
+  var q = quizData[quizState.current];
+  wrap.innerHTML = '<p class="quiz-question">Domanda ' + (quizState.current+1) + '/' + quizData.length + ': ' + escHtml(q.q) + '</p>'
+    + '<div class="quiz-options">'
+    + q.opts.map(function(o, i){
+        return '<button class="quiz-opt" onclick="answerQuiz(' + i + ')">' + escHtml(o) + '</button>';
+      }).join('')
+    + '</div>'
+    + '<div class="quiz-feedback msg" id="quiz-fb" role="status"></div>'
+    + '<div id="quiz-next" style="margin-top:.5rem;display:none">'
+    + '<button class="btn btn-primary btn-sm" onclick="nextQuestion()">Prossima domanda →</button></div>';
+}
+
+function answerQuiz(idx) {
+  if(quizState.answered) return;
+  quizState.answered = true;
+  var q = quizData[quizState.current];
+  var opts = document.querySelectorAll('.quiz-opt');
+  var fb = document.getElementById('quiz-fb');
+  var correct = idx === q.correct;
+  if(correct) quizState.score++;
+  opts.forEach(function(o, i){
+    o.disabled = true;
+    if(i === q.correct) o.classList.add('correct');
+    else if(i === idx && !correct) o.classList.add('wrong');
+  });
+  fb.textContent = (correct ? '✅ ' : '❌ ') + q.feedback;
+  fb.className = 'quiz-feedback msg visible ' + (correct ? 'msg-ok' : 'msg-err');
+  var nxt = document.getElementById('quiz-next');
+  if(nxt) nxt.style.display = 'block';
+}
+
+function nextQuestion() {
+  quizState.current++;
+  quizState.answered = false;
+  renderQuestion();
+}
+
+/* ===== ESCAPE HTML ===== */
 function escHtml(s) {
   return String(s).replace(/[&<>"']/g, function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
 
-// Invia segnalazione
+/* ===== CARICA SEGNALAZIONI ===== */
+async function loadReports() {
+  var list = document.getElementById('reportsList');
+  list.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg></div><p>Caricamento…</p></div>';
+  try {
+    var r = await fetch('api.php?action=reports').then(function(x){ return x.json(); });
+    if(!r.ok || !r.reports || !r.reports.length) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><p>Nessuna segnalazione ancora</p></div>';
+      return;
+    }
+    var prioMap = {Alta:'pill-alta',Media:'pill-media',Bassa:'pill-bassa'};
+    list.innerHTML = '<div class="reports-stack">' + r.reports.map(function(rep){
+      var date = new Date(rep.created_at).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'});
+      return '<div class="report-row">'
+        +'<div class="report-row-body">'
+        +'<div class="report-row-title">' + escHtml(rep.title) + '</div>'
+        +'<div class="report-row-meta">'
+        +'<span>' + escHtml(rep.category) + '</span>'
+        +'<span class="pill ' + (prioMap[rep.priority]||'') + '">' + escHtml(rep.priority) + '</span>'
+        +'<span class="pill pill-status">' + escHtml(rep.status) + '</span>'
+        +'<span>' + date + '</span>'
+        +'<span style="color:var(--text-faint)">da ' + escHtml(rep.name || 'Anonimo') + '</span>'
+        +'</div></div></div>';
+    }).join('') + '</div>';
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><p>Errore nel caricamento. <button class="btn btn-ghost btn-sm" onclick="loadReports()">Riprova</button></p></div>';
+  }
+}
+
+/* ===== INVIA SEGNALAZIONE ===== */
 document.getElementById('reportForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  var btn = document.getElementById('reportSubmit');
-  var msg = document.getElementById('reportMsg');
-  btn.disabled = true;
-  btn.textContent = 'Invio in corso…';
-
-  var anon = document.getElementById('r-anon').checked;
-  var name = document.getElementById('r-name').value.trim();
-
+  var submitBtn = document.getElementById('reportSubmit');
+  var msgEl     = document.getElementById('reportMsg');
+  var anon      = document.getElementById('r-anon').checked;
+  var name      = document.getElementById('r-name').value.trim();
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Invio…';
+  msgEl.className = 'msg';
   try {
-    var r = await fetch('api.php?action=report_create', {
+    var res = await fetch('api.php?action=report_create', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        title:       document.getElementById('r-title').value,
+        title:       document.getElementById('r-title').value.trim(),
         category:    document.getElementById('r-category').value,
-        description: document.getElementById('r-desc').value,
+        description: document.getElementById('r-desc').value.trim(),
         priority:    document.getElementById('r-priority').value,
         name:        anon ? 'Anonimo' : (name || 'Anonimo'),
         anonymous:   anon
       })
-    }).then(x => x.json());
-
-    if (r.ok) {
-      msg.innerHTML = '<div class="msg ok">Segnalazione inviata! Codice di tracciamento: <span class="tracking-box"><span class="tracking-code">' + escHtml(r.tracking_code) + '</span></span></div>';
+    }).then(function(x){ return x.json(); });
+    if(res.ok) {
+      msgEl.innerHTML = 'Segnalazione inviata con successo!'
+        + (res.tracking_code ? ' Codice: <span class="tracking-chip"><span class="tracking-code">' + escHtml(res.tracking_code) + '</span></span>' : '');
+      msgEl.className = 'msg msg-ok visible';
       document.getElementById('reportForm').reset();
       loadReports();
     } else {
-      msg.innerHTML = '<div class="msg err">' + escHtml(r.message || 'Errore invio') + '</div>';
+      msgEl.textContent = res.message || 'Errore durante l\'invio.';
+      msgEl.className = 'msg msg-err visible';
     }
   } catch(err) {
-    msg.innerHTML = '<div class="msg err">Errore di rete. Riprova.</div>';
+    msgEl.textContent = 'Errore di rete. Riprova tra qualche secondo.';
+    msgEl.className = 'msg msg-err visible';
   }
-  btn.disabled = false;
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Invia segnalazione';
+  submitBtn.disabled = false;
+  submitBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Invia segnalazione';
 });
 
+/* ===== FAB SCROLL ===== */
+window.addEventListener('scroll', function(){
+  document.getElementById('fabTop').classList.toggle('visible', window.scrollY > 300);
+});
+
+/* ===== INIT ===== */
 loadReports();
+initQuiz();
 </script>
 </body>
 </html>
