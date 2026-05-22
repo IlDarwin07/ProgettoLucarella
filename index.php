@@ -243,6 +243,7 @@ textarea.field-input{min-height:80px;resize:vertical}
 /* ===== SICUREZZA DIGITALE ===== */
 .sec-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
 .sec-tab{
+  display:inline-flex;align-items:center;gap:5px;
   padding:.3rem .75rem;border-radius:99px;
   font-size:.78rem;font-weight:600;
   cursor:pointer;border:1px solid var(--border);
@@ -251,6 +252,7 @@ textarea.field-input{min-height:80px;resize:vertical}
 }
 .sec-tab:hover{background:var(--surface3)}
 .sec-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.sec-tab svg{flex-shrink:0}
 .sec-panel{display:none;flex-direction:column;gap:.85rem}
 .sec-panel.active{display:flex}
 .tip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem}
@@ -484,8 +486,6 @@ textarea.field-input{min-height:80px;resize:vertical}
           <svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           <span>Le password sono salvate solo in questa sessione (demo). In produzione verranno cifrate lato server.</span>
         </div>
-
-        <!-- Aggiungi credenziale -->
         <form id="vaultForm" class="vault-add-form" novalidate>
           <div class="form-grid">
             <div class="field" style="margin:0">
@@ -508,9 +508,7 @@ textarea.field-input{min-height:80px;resize:vertical}
             </div>
           </div>
         </form>
-
         <div class="divider" style="margin:.8rem 0"></div>
-
         <div id="vaultList">
           <div class="empty-state">
             <div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
@@ -530,12 +528,29 @@ textarea.field-input{min-height:80px;resize:vertical}
         <span class="card-badge badge-success">Gratuito per tutti</span>
       </div>
       <div class="card-body">
+
+        <!-- Sotto-tab sicurezza CON ICONE SVG -->
         <div class="sec-tabs" role="tablist" aria-label="Argomenti sicurezza">
-          <button class="sec-tab active" role="tab" onclick="switchSecTab('password',this)">🔑 Password</button>
-          <button class="sec-tab" role="tab" onclick="switchSecTab('phishing',this)">🎣 Phishing</button>
-          <button class="sec-tab" role="tab" onclick="switchSecTab('2fa',this)">🔐 2FA</button>
-          <button class="sec-tab" role="tab" onclick="switchSecTab('privacy',this)">👁️ Privacy online</button>
-          <button class="sec-tab" role="tab" onclick="switchSecTab('quiz',this)">🎯 Test</button>
+          <button class="sec-tab active" role="tab" onclick="switchSecTab('password',this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+            Password
+          </button>
+          <button class="sec-tab" role="tab" onclick="switchSecTab('phishing',this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Phishing
+          </button>
+          <button class="sec-tab" role="tab" onclick="switchSecTab('2fa',this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            2FA
+          </button>
+          <button class="sec-tab" role="tab" onclick="switchSecTab('privacy',this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Privacy online
+          </button>
+          <button class="sec-tab" role="tab" onclick="switchSecTab('quiz',this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Test
+          </button>
         </div>
 
         <!-- PASSWORD -->
@@ -776,148 +791,4 @@ function initQuiz(){quizState={current:0,score:0,answered:false};renderQuestion(
 function renderQuestion(){
   var wrap=document.getElementById('quiz-wrap');
   if(quizState.current>=quizData.length){
-    var sc=quizState.score;
-    wrap.innerHTML='<div class="alert-box '+(sc>=4?'alert-success':sc>=2?'alert-info':'alert-warn')+'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg><div><strong>Risultato: '+sc+'/'+quizData.length+'</strong><br>'+(sc===5?'Eccellente! Sei un esperto di sicurezza digitale.':sc>=3?'Buone conoscenze! Ripasssa qualche argomento.':'Continua a studiare la guida sopra.')+'</div></div>';
-    return;
-  }
-  var q=quizData[quizState.current];
-  wrap.innerHTML='<p class="quiz-question">Domanda '+(quizState.current+1)+'/'+quizData.length+': '+escHtml(q.q)+'</p>'
-    +'<div class="quiz-options">'+q.opts.map(function(o,i){return'<button class="quiz-opt" onclick="answerQuiz('+i+')">'+escHtml(o)+'</button>';}).join('')+'</div>'
-    +'<div class="quiz-feedback msg" id="quiz-fb" role="status"></div>'
-    +'<div id="quiz-next" style="margin-top:.5rem;display:none"><button class="btn btn-primary btn-sm" onclick="nextQuestion()">Prossima domanda →</button></div>';
-}
-function answerQuiz(idx){
-  if(quizState.answered)return;
-  quizState.answered=true;
-  var q=quizData[quizState.current];
-  var opts=document.querySelectorAll('.quiz-opt');
-  var fb=document.getElementById('quiz-fb');
-  var correct=idx===q.correct;
-  if(correct)quizState.score++;
-  opts.forEach(function(o,i){o.disabled=true;if(i===q.correct)o.classList.add('correct');else if(i===idx&&!correct)o.classList.add('wrong');});
-  fb.textContent=(correct?'✅ ':'❌ ')+q.feedback;
-  fb.className='quiz-feedback msg visible '+(correct?'msg-ok':'msg-err');
-  var nxt=document.getElementById('quiz-next');if(nxt)nxt.style.display='block';
-}
-function nextQuestion(){quizState.current++;quizState.answered=false;renderQuestion();}
-
-/* ===== VAULT (sessione) ===== */
-var vaultItems=[];
-document.getElementById('vaultForm').addEventListener('submit',function(e){
-  e.preventDefault();
-  var site=document.getElementById('v-site').value.trim();
-  var user=document.getElementById('v-user').value.trim();
-  var pw=document.getElementById('v-pw').value;
-  if(!site||!user||!pw)return;
-  vaultItems.push({site:site,user:user,pw:pw,show:false});
-  document.getElementById('vaultForm').reset();
-  renderVault();
-});
-function renderVault(){
-  var list=document.getElementById('vaultList');
-  if(!vaultItems.length){
-    list.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><p>Nessuna credenziale salvata</p></div>';
-    return;
-  }
-  list.innerHTML='<div class="vault-list">'+vaultItems.map(function(item,i){
-    var pw=item.show?escHtml(item.pw):'••••••••';
-    return'<div class="vault-row">'
-      +'<span class="vault-row-site">'+escHtml(item.site)+'</span>'
-      +'<span class="vault-row-user">'+escHtml(item.user)+'</span>'
-      +'<span class="vault-pw">'+pw+'</span>'
-      +'<div class="vault-actions">'
-      +'<button class="btn btn-ghost btn-sm" onclick="toggleVaultPw('+i+')" title="Mostra/nascondi password">'+(item.show?'🙈':'👁️')+'</button>'
-      +'<button class="btn btn-danger btn-sm" onclick="deleteVaultItem('+i+')" title="Elimina">✕</button>'
-      +'</div></div>';
-  }).join('')+'</div>';
-}
-function toggleVaultPw(i){vaultItems[i].show=!vaultItems[i].show;renderVault();}
-function deleteVaultItem(i){vaultItems.splice(i,1);renderVault();}
-
-/* ===== SEGNALAZIONI ===== */
-async function loadReports(){
-  var list=document.getElementById('reportsList');
-  list.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg></div><p>Caricamento…</p></div>';
-  try{
-    var r=await fetch('api.php?action=reports').then(function(x){return x.json();});
-    if(!r.ok||!r.reports||!r.reports.length){list.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><p>Nessuna segnalazione ancora</p></div>';return;}
-    var prioMap={Alta:'pill-alta',Media:'pill-media',Bassa:'pill-bassa'};
-    list.innerHTML='<div class="reports-stack">'+r.reports.map(function(rep){
-      var date=new Date(rep.created_at).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'});
-      return'<div class="report-row"><div class="report-row-body">'
-        +'<div class="report-row-title">'+escHtml(rep.title)+'</div>'
-        +'<div class="report-row-meta">'
-        +'<span>'+escHtml(rep.category)+'</span>'
-        +'<span class="pill '+(prioMap[rep.priority]||'')+'">'+escHtml(rep.priority)+'</span>'
-        +'<span class="pill pill-status">'+escHtml(rep.status)+'</span>'
-        +'<span>'+date+'</span>'
-        +'<span style="color:var(--text-faint)">da '+escHtml(rep.name||'Anonimo')+'</span>'
-        +'</div></div></div>';
-    }).join('')+'</div>';
-  }catch(e){list.innerHTML='<div class="empty-state"><p>Errore nel caricamento. <button class="btn btn-ghost btn-sm" onclick="loadReports()">Riprova</button></p></div>';}
-}
-
-document.getElementById('reportForm').addEventListener('submit',async function(e){
-  e.preventDefault();
-  var submitBtn=document.getElementById('reportSubmit');
-  var msgEl=document.getElementById('reportMsg');
-  var anon=document.getElementById('r-anon').checked;
-  var name=document.getElementById('r-name').value.trim();
-  submitBtn.disabled=true;submitBtn.textContent='Invio…';msgEl.className='msg';
-  try{
-    var res=await fetch('api.php?action=report_create',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        title:document.getElementById('r-title').value.trim(),
-        category:document.getElementById('r-category').value,
-        description:document.getElementById('r-desc').value.trim(),
-        priority:document.getElementById('r-priority').value,
-        name:anon?'Anonimo':(name||'Anonimo'),
-        anonymous:anon
-      })
-    }).then(function(x){return x.json();});
-    if(res.ok){
-      msgEl.innerHTML='Segnalazione inviata con successo!'+(res.tracking_code?' Codice: <span class="tracking-chip"><span class="tracking-code">'+escHtml(res.tracking_code)+'</span></span>':'');
-      msgEl.className='msg msg-ok visible';
-      document.getElementById('reportForm').reset();
-      loadReports();
-    }else{msgEl.textContent=res.message||"Errore durante l'invio.";msgEl.className='msg msg-err visible';}
-  }catch(err){msgEl.textContent='Errore di rete. Riprova tra qualche secondo.';msgEl.className='msg msg-err visible';}
-  submitBtn.disabled=false;
-  submitBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Invia segnalazione';
-});
-
-/* ===== ADMIN STATS ===== */
-async function loadAdminReports(){
-  try{
-    var r=await fetch('api.php?action=reports').then(function(x){return x.json();});
-    if(!r.ok||!r.reports){return;}
-    var reps=r.reports;
-    document.getElementById('admin-total').textContent=reps.length;
-    document.getElementById('admin-alta').textContent=reps.filter(function(x){return x.priority==='Alta';}).length;
-    document.getElementById('admin-anon').textContent=reps.filter(function(x){return x.name==='Anonimo'||x.anonymous;}).length;
-    var prioMap={Alta:'pill-alta',Media:'pill-media',Bassa:'pill-bassa'};
-    document.getElementById('admin-reports-list').innerHTML='<div class="reports-stack">'+reps.map(function(rep){
-      var date=new Date(rep.created_at).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'});
-      return'<div class="report-row"><div class="report-row-body">'
-        +'<div class="report-row-title">'+escHtml(rep.title)+'</div>'
-        +'<div class="report-row-meta">'
-        +'<span>'+escHtml(rep.category)+'</span>'
-        +'<span class="pill '+(prioMap[rep.priority]||'')+'">'+escHtml(rep.priority)+'</span>'
-        +'<span class="pill pill-status">'+escHtml(rep.status)+'</span>'
-        +'<span>'+date+'</span>'
-        +'<span style="color:var(--text-faint)">da '+escHtml(rep.name||'Anonimo')+'</span>'
-        +'</div></div></div>';
-    }).join('')+'</div>';
-  }catch(e){document.getElementById('admin-reports-list').innerHTML='<div class="empty-state"><p>Errore nel caricamento.</p></div>';}
-}
-
-/* ===== FAB ===== */
-window.addEventListener('scroll',function(){document.getElementById('fabTop').classList.toggle('visible',window.scrollY>300);});
-
-/* ===== INIT ===== */
-loadReports();
-initQuiz();
-</script>
-</body>
-</html>
+ 
