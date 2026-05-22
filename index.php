@@ -81,20 +81,21 @@ img,svg{display:block}
 }
 .nav-top{
   height:var(--nav-h);
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;align-items:center;
   padding:0 1.25rem;
   gap:1rem;
 }
 .nav-brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--text);font-weight:700;font-size:.95rem;flex-shrink:0}
 .brand-icon{width:30px;height:30px;flex-shrink:0}
-/* Tab row — visibile SEMPRE, scrollabile su mobile */
-.nav-tabs-bar{
+
+/* Tab inline nella nav-top */
+.nav-tabs{
   display:flex;align-items:center;gap:4px;
   overflow-x:auto;scrollbar-width:none;
-  padding:0 1.25rem .6rem;
+  flex:1;
   -webkit-overflow-scrolling:touch;
 }
-.nav-tabs-bar::-webkit-scrollbar{display:none}
+.nav-tabs::-webkit-scrollbar{display:none}
 .nav-tab{
   display:inline-flex;align-items:center;gap:5px;
   padding:.35rem .75rem;border-radius:var(--radius);
@@ -106,19 +107,6 @@ img,svg{display:block}
 .nav-tab:hover{background:var(--surface3);color:var(--text)}
 .nav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:600}
 .nav-right{display:flex;align-items:center;gap:.5rem;flex-shrink:0}
-.user-chip{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:.75rem;font-weight:600;padding:.2rem .6rem;border-radius:99px;
-  background:var(--primary-bg);color:var(--primary);
-  border:1px solid var(--primary-light);white-space:nowrap;
-}
-.icon-btn{
-  width:34px;height:34px;border-radius:50%;
-  display:grid;place-items:center;
-  cursor:pointer;border:1px solid var(--border);background:var(--surface);
-  color:var(--text-muted);transition:background .15s,color .15s;
-}
-.icon-btn:hover{background:var(--surface3);color:var(--text)}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
   padding:.45rem 1rem;border-radius:var(--radius);
@@ -344,9 +332,7 @@ textarea.field-input{min-height:80px;resize:vertical}
   .page-wrap{padding:1rem .9rem}
   .tip-grid{grid-template-columns:1fr 1fr}
   .vault-row{flex-wrap:wrap}
-  /* su mobile nascondi solo nome utente e chip ruolo per risparmiare spazio */
-  .user-chip{display:none}
-  .nav-top span[style]{display:none}
+  .nav-tab span.tab-label{display:none}
 }
 @media(max-width:400px){
   .tip-grid{grid-template-columns:1fr}
@@ -367,38 +353,32 @@ textarea.field-input{min-height:80px;resize:vertical}
       </svg>
       SafeSchool Hub
     </a>
-    <div class="nav-right">
-      <span class="user-chip">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        <?= htmlspecialchars($role) ?>
-      </span>
-      <span style="font-size:.82rem;color:var(--text-muted)"><?= htmlspecialchars($userName) ?></span>
-      <button class="icon-btn" id="themeBtn" aria-label="Cambia tema">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+
+    <!-- Tab accanto al titolo -->
+    <div class="nav-tabs" role="tablist" aria-label="Navigazione sezioni">
+      <button class="nav-tab active" role="tab" data-view="segnalazioni" onclick="switchView('segnalazioni',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+        <span class="tab-label">Segnalazioni</span>
       </button>
+      <button class="nav-tab" role="tab" data-view="vault" onclick="switchView('vault',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span class="tab-label">Vault password</span>
+      </button>
+      <button class="nav-tab" role="tab" data-view="sicurezza" onclick="switchView('sicurezza',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span class="tab-label">Sicurezza digitale</span>
+      </button>
+      <?php if($isAdmin): ?>
+      <button class="nav-tab" role="tab" data-view="admin" onclick="switchView('admin',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="tab-label">Admin</span>
+      </button>
+      <?php endif; ?>
+    </div>
+
+    <div class="nav-right">
       <a href="logout.php" class="btn btn-ghost btn-sm">Esci</a>
     </div>
-  </div>
-  <!-- Tab sempre visibili, scrollabili su mobile -->
-  <div class="nav-tabs-bar" role="tablist" aria-label="Navigazione sezioni">
-    <button class="nav-tab active" role="tab" data-view="segnalazioni" onclick="switchView('segnalazioni',this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
-      Segnalazioni
-    </button>
-    <button class="nav-tab" role="tab" data-view="vault" onclick="switchView('vault',this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Vault password
-    </button>
-    <button class="nav-tab" role="tab" data-view="sicurezza" onclick="switchView('sicurezza',this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Sicurezza digitale
-    </button>
-    <?php if($isAdmin): ?>
-    <button class="nav-tab" role="tab" data-view="admin" onclick="switchView('admin',this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Admin
-    </button>
-    <?php endif; ?>
   </div>
 </nav>
 
@@ -730,20 +710,6 @@ textarea.field-input{min-height:80px;resize:vertical}
 </button>
 
 <script>
-/* ===== THEME ===== */
-(function(){
-  var html=document.documentElement,btn=document.getElementById('themeBtn'),icon=document.getElementById('themeIcon');
-  var SUN='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
-  var MOON='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-  var theme='light';
-  html.setAttribute('data-theme',theme);
-  btn.addEventListener('click',function(){
-    theme=theme==='light'?'dark':'light';
-    html.setAttribute('data-theme',theme);
-    icon.innerHTML=theme==='dark'?MOON:SUN;
-  });
-})();
-
 /* ===== VIEW SWITCHER ===== */
 function switchView(name,el){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
