@@ -13,7 +13,7 @@ if(!empty($_SESSION['user'])) {
 <title>Accedi — SafeSchool Hub</title>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <style>
-:root{
+:root,[data-theme="light"]{
   --bg:#f7f6f2;--surface:#ffffff;--border:#dcd9d5;--text:#28251d;--muted:#7a7974;
   --primary:#01696f;--primary-h:#0c4e54;--error:#a12c7b;
   --radius:0.5rem;--shadow:0 4px 24px rgba(0,0,0,.08);
@@ -126,10 +126,12 @@ input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-
 
 <script>
 (function(){
+  /* Tema fisso: SEMPRE chiaro all'avvio — il toggle permette di passare al dark manualmente */
   var btn = document.getElementById('themeBtn');
   var icon = document.getElementById('themeIcon');
-  var d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  var d = 'light';
   document.documentElement.setAttribute('data-theme', d);
+
   btn.addEventListener('click', function(){
     d = d==='dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', d);
