@@ -1,9 +1,9 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
-if(!empty($_SESSION['user'])) { header('Location: index.html'); exit; }
+if(!empty($_SESSION['user'])) { header('Location: index.php'); exit; }
 ?>
 <!DOCTYPE html>
-<html lang="it" data-theme="light">
+<html lang="it">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -15,11 +15,6 @@ if(!empty($_SESSION['user'])) { header('Location: index.html'); exit; }
   --primary:#01696f;--primary-h:#0c4e54;--error:#a12c7b;--success:#437a22;
   --radius:0.5rem;--shadow:0 4px 24px rgba(0,0,0,.08);
   --font:'Satoshi',system-ui,sans-serif;
-}
-[data-theme="dark"]{
-  --bg:#171614;--surface:#1c1b19;--border:#393836;--text:#cdccca;--muted:#797876;
-  --primary:#4f98a3;--primary-h:#227f8b;--error:#d163a7;--success:#6daa45;
-  --shadow:0 4px 24px rgba(0,0,0,.35);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased}
@@ -54,26 +49,11 @@ input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-
 .msg{padding:.65rem .9rem;border-radius:var(--radius);font-size:.85rem;margin-top:.75rem}
 .msg.err{background:color-mix(in oklab,var(--error) 12%,transparent);color:var(--error)}
 .msg.ok{background:color-mix(in oklab,var(--primary) 12%,transparent);color:var(--primary)}
-.theme-btn{position:fixed;top:1rem;right:1rem;background:var(--surface);border:1px solid var(--border);
-  border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;
-  color:var(--muted);transition:background .18s}
-.theme-btn:hover{background:var(--border)}
 </style>
 </head>
 <body>
-
-<button class="theme-btn" id="themeBtn" aria-label="Cambia tema">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon">
-    <circle cx="12" cy="12" r="5"/>
-    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-  </svg>
-</button>
-
 <div class="card">
-  <a href="index.html" class="logo">
+  <a href="login.php" class="logo">
     <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <rect x="2" y="2" width="28" height="28" rx="7" fill="var(--primary)" opacity=".12"/>
       <path d="M16 6 L26 10 L26 18 C26 23 21 27 16 29 C11 27 6 23 6 18 L6 10 Z" fill="var(--primary)" opacity=".25"/>
@@ -82,10 +62,8 @@ input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-
     </svg>
     <span>SafeSchool Hub</span>
   </a>
-
   <h1>Crea un account</h1>
   <p class="subtitle">Registrati con la tua email scolastica.</p>
-
   <form id="registerForm">
     <div class="field">
       <label for="name">Nome completo</label>
@@ -111,26 +89,10 @@ input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-
     </button>
     <div id="msg"></div>
   </form>
-
   <hr class="divider">
   <p class="login-link">Hai già un account? <a href="login.php">Accedi!</a></p>
 </div>
-
 <script>
-(function(){
-  var btn = document.getElementById('themeBtn');
-  var icon = document.getElementById('themeIcon');
-  var d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', d);
-  btn.addEventListener('click', function(){
-    d = d==='dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', d);
-    icon.innerHTML = d==='dark'
-      ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
-      : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
-  });
-})();
-
 document.getElementById('password').addEventListener('input', function(){
   var v = this.value;
   var score = 0;
@@ -151,7 +113,6 @@ document.getElementById('password').addEventListener('input', function(){
   else if(score <= 5){ bar.style.background='#437a22'; lbl.textContent='Buona'; }
   else{ bar.style.background='#01696f'; lbl.textContent='Eccellente ✓'; }
 });
-
 document.getElementById('registerForm').addEventListener('submit', async function(e){
   e.preventDefault();
   var btn = document.getElementById('submitBtn');
@@ -168,7 +129,6 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         password: document.getElementById('password').value
       })
     }).then(function(x){ return x.json(); });
-
     if(r.ok){
       msg.innerHTML = '<div class="msg ok">Account creato! Reindirizzamento al login…</div>';
       setTimeout(function(){ window.location.href = 'login.php'; }, 1000);
