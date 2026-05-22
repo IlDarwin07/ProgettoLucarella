@@ -98,14 +98,16 @@ switch ($action) {
 
     /* -------- REPORTS (lista pubblica) -------- */
     case 'reports':
+    case 'list_reports':
         $st = $pdo->query('SELECT id, name, category, title, priority, status, created_at FROM reports ORDER BY created_at DESC LIMIT 30');
         echo json_encode(['ok' => true, 'reports' => $st->fetchAll(PDO::FETCH_ASSOC)]);
         break;
 
     /* -------- REPORT CREATE -------- */
     case 'report_create':
+    case 'create_report':
         $d = json_decode(file_get_contents('php://input'), true);
-        $name     = trim($d['name'] ?? 'Anonimo');
+        $name     = trim($d['reporter_name'] ?? $d['name'] ?? 'Anonimo');
         $category = trim($d['category'] ?? 'Altro');
         $title    = trim($d['title'] ?? '');
         $desc     = trim($d['description'] ?? '');
@@ -121,7 +123,7 @@ switch ($action) {
             'INSERT INTO reports (user_id,name,category,title,description,priority,tracking_code) VALUES (?,?,?,?,?,?,?)'
         );
         $st->execute([$uid, $name, $category, $title, $desc, $priority, $code]);
-        echo json_encode(['ok' => true, 'tracking_code' => $code]);
+        echo json_encode(['ok' => true, 'success' => true, 'tracking_code' => $code]);
         break;
 
     /* -------- REPORT STATUS UPDATE (admin) -------- */
