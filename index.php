@@ -76,24 +76,32 @@ img,svg{display:block}
 /* ===== NAV ===== */
 .nav{
   position:sticky;top:0;z-index:200;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+}
+.nav-top{
   height:var(--nav-h);
   display:flex;align-items:center;justify-content:space-between;
   padding:0 1.25rem;
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
   gap:1rem;
 }
 .nav-brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--text);font-weight:700;font-size:.95rem;flex-shrink:0}
 .brand-icon{width:30px;height:30px;flex-shrink:0}
-.nav-center{flex:1;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
-.nav-center::-webkit-scrollbar{display:none}
+/* Tab row — visibile SEMPRE, scrollabile su mobile */
+.nav-tabs-bar{
+  display:flex;align-items:center;gap:4px;
+  overflow-x:auto;scrollbar-width:none;
+  padding:0 1.25rem .6rem;
+  -webkit-overflow-scrolling:touch;
+}
+.nav-tabs-bar::-webkit-scrollbar{display:none}
 .nav-tab{
   display:inline-flex;align-items:center;gap:5px;
   padding:.35rem .75rem;border-radius:var(--radius);
   font-size:.82rem;font-weight:500;color:var(--text-muted);
   cursor:pointer;border:none;background:transparent;font-family:inherit;
   white-space:nowrap;transition:background .15s,color .15s;
-  text-decoration:none;
+  text-decoration:none;flex-shrink:0;
 }
 .nav-tab:hover{background:var(--surface3);color:var(--text)}
 .nav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:600}
@@ -333,10 +341,12 @@ textarea.field-input{min-height:80px;resize:vertical}
 /* ===== RESPONSIVE ===== */
 @media(max-width:640px){
   .form-grid{grid-template-columns:1fr}
-  .nav-center{display:none}
   .page-wrap{padding:1rem .9rem}
   .tip-grid{grid-template-columns:1fr 1fr}
   .vault-row{flex-wrap:wrap}
+  /* su mobile nascondi solo nome utente e chip ruolo per risparmiare spazio */
+  .user-chip{display:none}
+  .nav-top span[style]{display:none}
 }
 @media(max-width:400px){
   .tip-grid{grid-template-columns:1fr}
@@ -347,17 +357,30 @@ textarea.field-input{min-height:80px;resize:vertical}
 
 <!-- NAV -->
 <nav class="nav">
-  <a href="index.php" class="nav-brand">
-    <svg class="brand-icon" viewBox="0 0 30 30" fill="none">
-      <rect width="30" height="30" rx="7" fill="var(--primary)" opacity=".12"/>
-      <path d="M15 4L24 8v8c0 5-4.5 8.5-9 10.5C5.5 24.5 1 21 1 16V8l9-4z" fill="var(--primary)" opacity=".2"/>
-      <path d="M15 5.5L23 9v7c0 4.5-4 7.8-8 9.8-4-2-8-5.3-8-9.8V9l8-3.5z" stroke="var(--primary)" stroke-width="1.4" fill="none"/>
-      <path d="M11 15l3 3 5-6" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    SafeSchool Hub
-  </a>
-
-  <div class="nav-center" role="tablist" aria-label="Navigazione sezioni">
+  <div class="nav-top">
+    <a href="index.php" class="nav-brand">
+      <svg class="brand-icon" viewBox="0 0 30 30" fill="none">
+        <rect width="30" height="30" rx="7" fill="var(--primary)" opacity=".12"/>
+        <path d="M15 4L24 8v8c0 5-4.5 8.5-9 10.5C5.5 24.5 1 21 1 16V8l9-4z" fill="var(--primary)" opacity=".2"/>
+        <path d="M15 5.5L23 9v7c0 4.5-4 7.8-8 9.8-4-2-8-5.3-8-9.8V9l8-3.5z" stroke="var(--primary)" stroke-width="1.4" fill="none"/>
+        <path d="M11 15l3 3 5-6" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      SafeSchool Hub
+    </a>
+    <div class="nav-right">
+      <span class="user-chip">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <?= htmlspecialchars($role) ?>
+      </span>
+      <span style="font-size:.82rem;color:var(--text-muted)"><?= htmlspecialchars($userName) ?></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Cambia tema">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <a href="logout.php" class="btn btn-ghost btn-sm">Esci</a>
+    </div>
+  </div>
+  <!-- Tab sempre visibili, scrollabili su mobile -->
+  <div class="nav-tabs-bar" role="tablist" aria-label="Navigazione sezioni">
     <button class="nav-tab active" role="tab" data-view="segnalazioni" onclick="switchView('segnalazioni',this)">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
       Segnalazioni
@@ -376,18 +399,6 @@ textarea.field-input{min-height:80px;resize:vertical}
       Admin
     </button>
     <?php endif; ?>
-  </div>
-
-  <div class="nav-right">
-    <span class="user-chip">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      <?= htmlspecialchars($role) ?>
-    </span>
-    <span style="font-size:.82rem;color:var(--text-muted)"><?= htmlspecialchars($userName) ?></span>
-    <button class="icon-btn" id="themeBtn" aria-label="Cambia tema">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </button>
-    <a href="logout.php" class="btn btn-ghost btn-sm">Esci</a>
   </div>
 </nav>
 
@@ -528,8 +539,6 @@ textarea.field-input{min-height:80px;resize:vertical}
         <span class="card-badge badge-success">Gratuito per tutti</span>
       </div>
       <div class="card-body">
-
-        <!-- Sotto-tab sicurezza CON ICONE SVG -->
         <div class="sec-tabs" role="tablist" aria-label="Argomenti sicurezza">
           <button class="sec-tab active" role="tab" onclick="switchSecTab('password',this)">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
@@ -578,7 +587,7 @@ textarea.field-input{min-height:80px;resize:vertical}
             <div class="tip-card"><div class="tip-card-icon">📏</div><div class="tip-card-title">Lunghezza > Complessità</div><div class="tip-card-desc">Una frase lunga come «CoffeIn@Mattino2024!» è più sicura di «x$8Q».</div></div>
             <div class="tip-card"><div class="tip-card-icon">🔄</div><div class="tip-card-title">Unica per ogni sito</div><div class="tip-card-desc">Non riutilizzare mai la stessa password su più piattaforme.</div></div>
             <div class="tip-card"><div class="tip-card-icon">🗝️</div><div class="tip-card-title">Usa un password manager</div><div class="tip-card-desc">Bitwarden o KeePass generano e memorizzano password sicure per te.</div></div>
-            <div class="tip-card"><div class="tip-card-icon">🚫</div><div class="tip-card-title">Evita dati personali</div><div class="tip-card-desc">Nome, data di nascita, numero di telefono sono facilmente indovinabili.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">🚻</div><div class="tip-card-title">Evita dati personali</div><div class="tip-card-desc">Nome, data di nascita, numero di telefono sono facilmente indovinabili.</div></div>
           </div>
         </div>
 
@@ -790,5 +799,164 @@ var quizState={current:0,score:0,answered:false};
 function initQuiz(){quizState={current:0,score:0,answered:false};renderQuestion();}
 function renderQuestion(){
   var wrap=document.getElementById('quiz-wrap');
+  if(!wrap)return;
   if(quizState.current>=quizData.length){
- 
+    wrap.innerHTML='<div class="alert-box alert-success"><svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Quiz completato: '+quizState.score+' / '+quizData.length+' risposte corrette.</span></div>';
+    return;
+  }
+  var item=quizData[quizState.current];
+  wrap.innerHTML='<div class="quiz-question">'+escHtml(item.q)+'</div><div class="quiz-options">'+item.opts.map(function(opt,i){return '<button type="button" class="quiz-opt" onclick="answerQuiz('+i+')">'+escHtml(opt)+'</button>';}).join('')+'</div><div class="quiz-feedback" id="quiz-feedback"></div>';
+}
+function answerQuiz(index){
+  if(quizState.answered)return;
+  quizState.answered=true;
+  var item=quizData[quizState.current];
+  var options=document.querySelectorAll('.quiz-opt');
+  options.forEach(function(btn,i){
+    if(i===item.correct)btn.classList.add('correct');
+    if(i===index&&i!==item.correct)btn.classList.add('wrong');
+    btn.disabled=true;
+  });
+  if(index===item.correct)quizState.score++;
+  var feedback=document.getElementById('quiz-feedback');
+  feedback.className='quiz-feedback visible '+(index===item.correct?'msg-ok':'msg-err');
+  feedback.textContent=item.feedback;
+  setTimeout(function(){quizState.current++;quizState.answered=false;renderQuestion();},1400);
+}
+
+/* ===== VAULT (sessione locale) ===== */
+var vaultItems=[];
+function renderVault(){
+  var list=document.getElementById('vaultList');
+  if(!list)return;
+  if(!vaultItems.length){
+    list.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><p>Nessuna credenziale salvata</p></div>';
+    return;
+  }
+  list.innerHTML='<div class="vault-list">'+vaultItems.map(function(item,idx){return '<div class="vault-row"><div class="vault-row-site">'+escHtml(item.site)+'</div><div class="vault-row-user">'+escHtml(item.user)+'</div><div class="vault-pw">••••••••</div><div class="vault-actions"><button type="button" class="btn btn-ghost btn-sm" onclick="toggleVaultPw('+idx+',this)">Mostra</button><button type="button" class="btn btn-ghost btn-sm" onclick="removeVault('+idx+')">Elimina</button></div></div>';}).join('')+'</div>';
+}
+function toggleVaultPw(index,btn){
+  var row=btn.closest('.vault-row');
+  var pw=row.querySelector('.vault-pw');
+  var visible=btn.dataset.visible==='1';
+  pw.textContent=visible?'••••••••':vaultItems[index].pw;
+  btn.textContent=visible?'Mostra':'Nascondi';
+  btn.dataset.visible=visible?'0':'1';
+}
+function removeVault(index){vaultItems.splice(index,1);renderVault();}
+document.getElementById('vaultForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var site=document.getElementById('v-site').value.trim();
+  var user=document.getElementById('v-user').value.trim();
+  var pw=document.getElementById('v-pw').value.trim();
+  if(!site||!user||!pw)return;
+  vaultItems.unshift({site:site,user:user,pw:pw});
+  this.reset();
+  renderVault();
+});
+
+/* ===== SHOW MSG ===== */
+function showMsg(el,text,ok){
+  el.className='msg visible '+(ok?'msg-ok':'msg-err');
+  el.textContent=text;
+}
+
+/* ===== REPORTS ===== */
+async function apiGet(url){
+  var r=await fetch(url,{headers:{'Accept':'application/json'}});
+  var t=await r.text();
+  try{return JSON.parse(t);}catch(e){throw new Error('Risposta non valida');}
+}
+async function loadReports(){
+  var box=document.getElementById('reportsList');
+  if(!box)return;
+  box.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg></div><p>Caricamento in corso…</p></div>';
+  try{
+    var data=await apiGet('api.php?action=list_reports');
+    var items=Array.isArray(data.reports)?data.reports:[];
+    if(!items.length){
+      box.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg></div><p>Nessuna segnalazione disponibile</p></div>';
+      return;
+    }
+    box.innerHTML='<div class="reports-stack">'+items.slice(0,10).map(function(r){
+      var priority=(r.priority||'Media').toLowerCase();
+      var priorityClass=priority==='alta'?'pill-alta':priority==='bassa'?'pill-bassa':'pill-media';
+      return '<div class="report-row"><div class="report-row-body"><div class="report-row-title">'+escHtml(r.title||'Segnalazione')+'</div><div class="report-row-meta"><span class="pill '+priorityClass+'">'+escHtml(r.priority||'Media')+'</span><span class="pill pill-status">'+escHtml(r.status||'Nuova')+'</span><span>'+escHtml(r.category||'Altro')+'</span><span>'+escHtml(r.created_at||'')+'</span></div></div></div>';
+    }).join('')+'</div>';
+  }catch(err){
+    box.innerHTML='<div class="empty-state"><p>Impossibile caricare le segnalazioni.</p></div>';
+  }
+}
+document.getElementById('reportForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  var msg=document.getElementById('reportMsg');
+  var submit=document.getElementById('reportSubmit');
+  var payload={
+    title:document.getElementById('r-title').value.trim(),
+    category:document.getElementById('r-category').value,
+    description:document.getElementById('r-desc').value.trim(),
+    priority:document.getElementById('r-priority').value,
+    reporter_name:document.getElementById('r-anon').checked?'':document.getElementById('r-name').value.trim(),
+    anonymous:document.getElementById('r-anon').checked?1:0
+  };
+  if(!payload.title||!payload.description){showMsg(msg,'Compila almeno titolo e descrizione.',false);return;}
+  submit.disabled=true;
+  try{
+    var res=await fetch('api.php?action=create_report',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload)});
+    var data=await res.json();
+    if(!res.ok||!data.ok)throw new Error(data.message||'Invio non riuscito');
+    this.reset();
+    showMsg(msg,'Segnalazione inviata con successo.',true);
+    if(data.tracking_code){
+      msg.innerHTML='Segnalazione inviata.<div class="tracking-chip">Codice: <span class="tracking-code">'+escHtml(data.tracking_code)+'</span></div>';
+      msg.className='msg visible msg-ok';
+    }
+    loadReports();
+  }catch(err){
+    showMsg(msg,err.message||'Errore durante l\'invio.',false);
+  }finally{
+    submit.disabled=false;
+  }
+});
+
+/* ===== ADMIN ===== */
+async function loadAdminReports(){
+  try{
+    var data=await apiGet('api.php?action=admin_reports');
+    var items=Array.isArray(data.reports)?data.reports:[];
+    document.getElementById('admin-total').textContent=items.length;
+    document.getElementById('admin-alta').textContent=items.filter(function(r){return r.priority==='Alta';}).length;
+    document.getElementById('admin-anon').textContent=items.filter(function(r){return r.name==='Anonimo';}).length;
+    var list=document.getElementById('admin-reports-list');
+    if(!items.length){list.innerHTML='<div class="empty-state"><p>Nessuna segnalazione.</p></div>';return;}
+    list.innerHTML='<div class="reports-stack">'+items.map(function(r){
+      var priority=(r.priority||'Media').toLowerCase();
+      var priorityClass=priority==='alta'?'pill-alta':priority==='bassa'?'pill-bassa':'pill-media';
+      return '<div class="report-row"><div class="report-row-body"><div class="report-row-title">'+escHtml(r.title)+'</div><div class="report-row-meta"><span class="pill '+priorityClass+'">'+escHtml(r.priority)+'</span><span class="pill pill-status">'+escHtml(r.status||'Nuova')+'</span><span>'+escHtml(r.category)+'</span><span>'+escHtml(r.name||'Anonimo')+'</span><span>'+escHtml(r.created_at||'')+'</span></div></div><div style="display:flex;gap:.3rem;flex-shrink:0"><button class="btn btn-ghost btn-sm" onclick="changeStatus('+r.id+',\'In revisione\')">In revisione</button><button class="btn btn-ghost btn-sm" onclick="changeStatus('+r.id+',\'Risolta\')">Risolta</button><button class="btn btn-danger btn-sm" onclick="deleteReport('+r.id+')">Elimina</button></div></div>';
+    }).join('')+'</div>';
+  }catch(err){
+    document.getElementById('admin-reports-list').innerHTML='<div class="empty-state"><p>Errore caricamento.</p></div>';
+  }
+}
+async function changeStatus(id,status){
+  await fetch('api.php?action=report_status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,status:status})});
+  loadAdminReports();
+}
+async function deleteReport(id){
+  if(!confirm('Eliminare questa segnalazione?'))return;
+  await fetch('api.php?action=delete_report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id})});
+  loadAdminReports();
+}
+
+/* ===== FAB ===== */
+window.addEventListener('scroll',function(){
+  document.getElementById('fabTop').classList.toggle('visible',window.scrollY>280);
+});
+
+/* ===== INIT ===== */
+renderVault();
+initQuiz();
+loadReports();
+</script>
+</body>
+</html>
