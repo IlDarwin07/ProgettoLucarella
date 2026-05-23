@@ -10,6 +10,7 @@ if (file_exists($envFile)) {
     }
 }
 
+// Fallback ai valori di default XAMPP se .env non esiste
 $host   = $_ENV['DB_HOST'] ?? 'localhost';
 $dbname = $_ENV['DB_NAME'] ?? 'safeschool';
 $user   = $_ENV['DB_USER'] ?? 'root';
@@ -28,5 +29,12 @@ try {
     );
 } catch (PDOException $e) {
     http_response_code(500);
-    die(json_encode(['ok' => false, 'message' => 'Errore connessione database']));
+    // Messaggio dettagliato solo in sviluppo locale
+    $isDev = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1']);
+    die(json_encode([
+        'ok'      => false,
+        'message' => $isDev
+            ? 'DB error: ' . $e->getMessage() . " — DB: $dbname@$host"
+            : 'Errore connessione database'
+    ]));
 }
