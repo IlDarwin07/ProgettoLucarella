@@ -1,0 +1,17 @@
+# Variabili d'ambiente — MAI su Git
+.env
+
+# Dipendenze
+vendor/
+
+# File temporanei
+*.log
+*.tmp
+
+# Configurazioni IDE
+.vscode/
+.idea/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
