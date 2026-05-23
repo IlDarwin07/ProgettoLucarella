@@ -230,11 +230,17 @@ textarea.field-input{min-height:80px;resize:vertical}
   border-radius:var(--radius);
   background:var(--surface2);
   border:1px solid var(--border2);
+  transition:border-color .15s;
 }
+.vault-row:hover{border-color:var(--border)}
 .vault-row-site{font-weight:600;font-size:.85rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vault-row-user{font-size:.78rem;color:var(--text-muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vault-pw{font-family:'Courier New',monospace;font-size:.82rem;color:var(--text-faint);min-width:80px;letter-spacing:.05em}
 .vault-actions{display:flex;gap:.3rem;flex-shrink:0}
+.vault-pw-wrap{display:flex;align-items:center;gap:.4rem;min-width:0}
+.vault-pw-text{font-family:'Courier New',monospace;font-size:.8rem;color:var(--text-faint);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.vault-notes{font-size:.75rem;color:var(--text-faint);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.pw-gen-row{display:flex;align-items:center;gap:.4rem}
 
 /* ===== SICUREZZA DIGITALE ===== */
 .sec-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
@@ -326,6 +332,11 @@ textarea.field-input{min-height:80px;resize:vertical}
 }
 .fab.visible{opacity:1;pointer-events:all}
 
+/* ===== VAULT SPINNER ===== */
+@keyframes spin{to{transform:rotate(360deg)}}
+.vault-loading{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1.5rem;color:var(--text-muted);font-size:.85rem}
+.vault-spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+
 /* ===== RESPONSIVE ===== */
 @media(max-width:640px){
   .form-grid{grid-template-columns:1fr}
@@ -360,9 +371,10 @@ textarea.field-input{min-height:80px;resize:vertical}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
         <span class="tab-label">Segnalazioni</span>
       </button>
-      <button class="nav-tab" role="tab" data-view="vault" onclick="switchView('vault',this)">
+      <button class="nav-tab" role="tab" data-view="vault" onclick="switchView('vault',this);loadVault()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <span class="tab-label">Vault password</span>
+        <span id="vaultNavBadge" style="display:none;background:var(--primary);color:#fff;font-size:.65rem;font-weight:700;border-radius:99px;padding:.05rem .38rem;min-width:16px;text-align:center"></span>
       </button>
       <button class="nav-tab" role="tab" data-view="sicurezza" onclick="switchView('sicurezza',this)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -470,13 +482,15 @@ textarea.field-input{min-height:80px;resize:vertical}
       <div class="card-header">
         <svg class="card-header-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <span class="card-title">Vault password personale</span>
-        <span class="card-badge badge-success">Cifrato in locale</span>
+        <span id="vaultCountBadge" class="card-badge badge-success" style="display:none"></span>
+        <span class="card-badge badge-primary" style="margin-left:.35rem">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Cifrato AES-256
+        </span>
       </div>
       <div class="card-body">
-        <div class="alert-box alert-info" style="margin-bottom:.9rem">
-          <svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <span>Le password sono salvate solo in questa sessione (demo). In produzione verranno cifrate lato server.</span>
-        </div>
+
+        <!-- Form aggiunta credenziale -->
         <form id="vaultForm" class="vault-add-form" novalidate>
           <div class="form-grid">
             <div class="field" style="margin:0">
@@ -485,27 +499,50 @@ textarea.field-input{min-height:80px;resize:vertical}
             </div>
             <div class="field" style="margin:0">
               <label class="field-label" for="v-user">Username / Email *</label>
-              <input class="field-input" id="v-user" type="text" placeholder="nome@email.com" required>
+              <input class="field-input" id="v-user" type="text" placeholder="nome@email.com" required autocomplete="off">
             </div>
-            <div class="field" style="margin:0">
-              <label class="field-label" for="v-pw">Password *</label>
-              <input class="field-input" id="v-pw" type="password" placeholder="Password" required>
-            </div>
-            <div class="field" style="margin:0;justify-content:flex-end;padding-top:1.35rem">
-              <button class="btn btn-primary" type="submit">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Aggiungi
+          </div>
+          <div class="field" style="margin:0">
+            <label class="field-label" for="v-pw">Password *</label>
+            <div class="pw-gen-row">
+              <input class="field-input" id="v-pw" type="text" placeholder="Password" required autocomplete="off" style="flex:1;font-family:'Courier New',monospace">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="generateVaultPw('random')" title="Genera password casuale">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.49"/></svg>
+                Genera
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="generateVaultPw('phrase')" title="Genera passphrase">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Frase
               </button>
             </div>
           </div>
-        </form>
-        <div class="divider" style="margin:.8rem 0"></div>
-        <div id="vaultList">
-          <div class="empty-state">
-            <div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-            <p>Nessuna credenziale salvata</p>
+          <div class="field" style="margin:0">
+            <label class="field-label" for="v-notes">Note <span style="font-weight:400;text-transform:none;letter-spacing:0">(opzionale)</span></label>
+            <input class="field-input" id="v-notes" type="text" placeholder="Es. account aziendale, scadenza marzo…">
           </div>
+          <div class="form-row" style="margin-top:.4rem">
+            <button class="btn btn-primary" type="submit" id="vaultSubmit">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Salva credenziale
+            </button>
+            <span id="vaultFormMsg" class="msg" style="margin:0"></span>
+          </div>
+        </form>
+
+        <div class="divider" style="margin:.85rem 0"></div>
+
+        <!-- Lista credenziali -->
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">
+          <span style="font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Credenziali salvate</span>
+          <button class="btn btn-ghost btn-sm" onclick="loadVault()" aria-label="Ricarica vault" style="margin-left:auto">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.49"/></svg>
+            Aggiorna
+          </button>
         </div>
+        <div id="vaultList">
+          <div class="vault-loading"><div class="vault-spinner"></div> Caricamento…</div>
+        </div>
+
       </div>
     </div>
   </div><!-- /view-vault -->
@@ -790,42 +827,150 @@ function answerQuiz(index){
   setTimeout(function(){quizState.current++;quizState.answered=false;renderQuestion();},1400);
 }
 
-/* ===== VAULT (sessione locale) ===== */
-var vaultItems=[];
-function renderVault(){
-  var list=document.getElementById('vaultList');
-  if(!list)return;
-  if(!vaultItems.length){
-    list.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><p>Nessuna credenziale salvata</p></div>';
-    return;
-  }
-  list.innerHTML='<div class="vault-list">'+vaultItems.map(function(item,idx){return '<div class="vault-row"><div class="vault-row-site">'+escHtml(item.site)+'</div><div class="vault-row-user">'+escHtml(item.user)+'</div><div class="vault-pw">••••••••</div><div class="vault-actions"><button type="button" class="btn btn-ghost btn-sm" onclick="toggleVaultPw('+idx+',this)">Mostra</button><button type="button" class="btn btn-ghost btn-sm" onclick="removeVault('+idx+')">Elimina</button></div></div>';}).join('')+'</div>';
-}
-function toggleVaultPw(index,btn){
-  var row=btn.closest('.vault-row');
-  var pw=row.querySelector('.vault-pw');
-  var visible=btn.dataset.visible==='1';
-  pw.textContent=visible?'••••••••':vaultItems[index].pw;
-  btn.textContent=visible?'Mostra':'Nascondi';
-  btn.dataset.visible=visible?'0':'1';
-}
-function removeVault(index){vaultItems.splice(index,1);renderVault();}
-document.getElementById('vaultForm').addEventListener('submit',function(e){
-  e.preventDefault();
-  var site=document.getElementById('v-site').value.trim();
-  var user=document.getElementById('v-user').value.trim();
-  var pw=document.getElementById('v-pw').value.trim();
-  if(!site||!user||!pw)return;
-  vaultItems.unshift({site:site,user:user,pw:pw});
-  this.reset();
-  renderVault();
-});
-
 /* ===== SHOW MSG ===== */
 function showMsg(el,text,ok){
   el.className='msg visible '+(ok?'msg-ok':'msg-err');
   el.textContent=text;
+  if(ok)setTimeout(function(){el.className='msg';},3000);
 }
+
+/* ============================================================
+   VAULT — collegato alle API reali (persistenza al logout)
+   ============================================================ */
+var _vaultData = []; // cache locale dopo il caricamento
+
+async function loadVault(){
+  var list = document.getElementById('vaultList');
+  list.innerHTML = '<div class="vault-loading"><div class="vault-spinner"></div> Caricamento…</div>';
+  try {
+    var r = await fetch('api.php?action=vault_list', {headers:{Accept:'application/json'}});
+    var d = await r.json();
+    if(!d.ok) throw new Error(d.message || 'Errore API');
+    _vaultData = d.items || [];
+    renderVaultList();
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><p>Errore caricamento vault</p></div>';
+  }
+}
+
+function renderVaultList(){
+  var list = document.getElementById('vaultList');
+  var badge = document.getElementById('vaultCountBadge');
+  var navBadge = document.getElementById('vaultNavBadge');
+  var n = _vaultData.length;
+
+  // Aggiorna badge contatore
+  if(n > 0){
+    badge.textContent = n + ' credenzial' + (n===1?'e':'i');
+    badge.style.display = '';
+    navBadge.textContent = n;
+    navBadge.style.display = '';
+  } else {
+    badge.style.display = 'none';
+    navBadge.style.display = 'none';
+  }
+
+  if(!n){
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><p>Nessuna credenziale salvata</p></div>';
+    return;
+  }
+
+  list.innerHTML = '<div class="vault-list">' + _vaultData.map(function(item){
+    var notesHtml = item.notes ? '<div class="vault-notes" title="'+escHtml(item.notes)+'">📝 '+escHtml(item.notes)+'</div>' : '';
+    return '<div class="vault-row" data-id="'+item.id+'">' +
+      '<div style="display:flex;flex-direction:column;flex:1;min-width:0;gap:.1rem">' +
+        '<div class="vault-row-site">'+escHtml(item.site_name)+'</div>' +
+        '<div class="vault-row-user">'+escHtml(item.username)+'</div>' +
+        notesHtml +
+      '</div>' +
+      '<div class="vault-pw-wrap">' +
+        '<span class="vault-pw-text" data-plain="'+escHtml(item.password_plain)+'">••••••••</span>' +
+      '</div>' +
+      '<div class="vault-actions">' +
+        '<button type="button" class="btn btn-ghost btn-sm" onclick="toggleVaultPw(this)" aria-label="Mostra/nascondi password">Mostra</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" onclick="copyVaultPw(this)" aria-label="Copia password">Copia</button>' +
+        '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVaultItem('+item.id+',this)" aria-label="Elimina">Elimina</button>' +
+      '</div>' +
+    '</div>';
+  }).join('') + '</div>';
+}
+
+function toggleVaultPw(btn){
+  var pwEl = btn.closest('.vault-row').querySelector('.vault-pw-text');
+  var visible = btn.dataset.visible === '1';
+  pwEl.textContent = visible ? '••••••••' : pwEl.dataset.plain;
+  btn.textContent = visible ? 'Mostra' : 'Nascondi';
+  btn.dataset.visible = visible ? '0' : '1';
+}
+
+function copyVaultPw(btn){
+  var pwEl = btn.closest('.vault-row').querySelector('.vault-pw-text');
+  navigator.clipboard.writeText(pwEl.dataset.plain).then(function(){
+    var orig = btn.textContent;
+    btn.textContent = '✓ Copiata';
+    setTimeout(function(){btn.textContent = orig;}, 1800);
+  });
+}
+
+async function deleteVaultItem(id, btn){
+  if(!confirm('Eliminare questa credenziale?')) return;
+  btn.disabled = true;
+  try {
+    var r = await fetch('api.php?action=vault_delete', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', Accept:'application/json'},
+      body: JSON.stringify({id: id})
+    });
+    var d = await r.json();
+    if(!d.ok) throw new Error(d.message);
+    await loadVault();
+  } catch(e) {
+    btn.disabled = false;
+    alert('Errore eliminazione: ' + e.message);
+  }
+}
+
+async function generateVaultPw(mode){
+  var pwInput = document.getElementById('v-pw');
+  pwInput.placeholder = 'Generazione…';
+  try {
+    var r = await fetch('api.php?action=generate_password&mode='+mode, {headers:{Accept:'application/json'}});
+    var d = await r.json();
+    if(d.ok) {
+      pwInput.value = d.password;
+      pwInput.focus();
+    }
+  } catch(e) { /* fallback silenzioso */ }
+  pwInput.placeholder = 'Password';
+}
+
+document.getElementById('vaultForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var msg    = document.getElementById('vaultFormMsg');
+  var submit = document.getElementById('vaultSubmit');
+  var site   = document.getElementById('v-site').value.trim();
+  var user   = document.getElementById('v-user').value.trim();
+  var pw     = document.getElementById('v-pw').value.trim();
+  var notes  = document.getElementById('v-notes').value.trim();
+  if(!site || !user || !pw){ showMsg(msg,'Compila sito, username e password.',false); return; }
+  submit.disabled = true;
+  try {
+    var r = await fetch('api.php?action=vault_add', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', Accept:'application/json'},
+      body: JSON.stringify({site_name: site, username: user, password_plain: pw, notes: notes})
+    });
+    var d = await r.json();
+    if(!r.ok || !d.ok) throw new Error(d.message || 'Salvataggio fallito');
+    this.reset();
+    showMsg(msg,'Credenziale salvata con successo!', true);
+    await loadVault();
+  } catch(err){
+    showMsg(msg, err.message || 'Errore durante il salvataggio.', false);
+  } finally {
+    submit.disabled = false;
+  }
+});
 
 /* ===== REPORTS ===== */
 async function apiGet(url){
@@ -879,7 +1024,7 @@ document.getElementById('reportForm').addEventListener('submit',async function(e
     }
     loadReports();
   }catch(err){
-    showMsg(msg,err.message||'Errore durante l\'invio.',false);
+    showMsg(msg,err.message||"Errore durante l'invio.",false);
   }finally{
     submit.disabled=false;
   }
@@ -920,9 +1065,9 @@ window.addEventListener('scroll',function(){
 });
 
 /* ===== INIT ===== */
-renderVault();
 initQuiz();
 loadReports();
+loadVault(); // pre-carica vault in background per aggiornare il badge nella nav
 </script>
 </body>
 </html>
