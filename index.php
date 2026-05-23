@@ -124,6 +124,36 @@ img,svg{display:block}
 .btn-danger{background:var(--error-bg);color:var(--error);border-color:var(--error-bg)}
 .btn-danger:hover{border-color:var(--error)}
 
+/* ===== USER ACCOUNT BUTTON ===== */
+.user-account-btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.3rem .65rem .3rem .3rem;
+  border-radius:var(--radius-lg);
+  border:1px solid var(--border);
+  background:var(--surface2);
+  text-decoration:none;color:var(--text);
+  font-size:.82rem;font-weight:600;
+  transition:background .15s,border-color .15s,box-shadow .15s;
+  flex-shrink:0;max-width:180px;
+}
+.user-account-btn:hover{background:var(--surface3);border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-bg);}
+.nav-avatar{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;flex-shrink:0;
+  background:var(--primary);color:#fff;
+  transition:transform .15s;
+}
+.user-account-btn:hover .nav-avatar{transform:scale(1.08);}
+.nav-user-name{
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:96px;
+}
+@media(max-width:520px){
+  .nav-user-name{display:none;}
+  .user-account-btn{padding:.3rem;}
+}
+
 /* ===== LAYOUT ===== */
 .page-wrap{max-width:960px;margin:0 auto;padding:1.5rem 1.25rem;display:flex;flex-direction:column;gap:1.25rem}
 
@@ -388,8 +418,16 @@ textarea.field-input{min-height:80px;resize:vertical}
       <?php endif; ?>
     </div>
 
+    <!-- ===== USER ACCOUNT BUTTON (navbar destra) ===== -->
     <div class="nav-right">
-      <a href="logout.php" class="btn btn-ghost btn-sm">Esci</a>
+      <a href="profile.php" class="user-account-btn" id="navUserBtn" title="Il tuo profilo">
+        <div class="nav-avatar" id="navAvatar">?</div>
+        <span class="nav-user-name"><?= htmlspecialchars($userName) ?></span>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;opacity:.45"><polyline points="6 9 12 15 18 9"/></svg>
+      </a>
+      <a href="logout.php" class="btn btn-ghost btn-sm" title="Esci" aria-label="Esci">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </a>
     </div>
   </div>
 </nav>
@@ -604,7 +642,7 @@ textarea.field-input{min-height:80px;resize:vertical}
             <div class="tip-card"><div class="tip-card-icon">📏</div><div class="tip-card-title">Lunghezza > Complessità</div><div class="tip-card-desc">Una frase lunga come «CoffeIn@Mattino2024!» è più sicura di «x$8Q».</div></div>
             <div class="tip-card"><div class="tip-card-icon">🔄</div><div class="tip-card-title">Unica per ogni sito</div><div class="tip-card-desc">Non riutilizzare mai la stessa password su più piattaforme.</div></div>
             <div class="tip-card"><div class="tip-card-icon">🗝️</div><div class="tip-card-title">Usa un password manager</div><div class="tip-card-desc">Bitwarden o KeePass generano e memorizzano password sicure per te.</div></div>
-            <div class="tip-card"><div class="tip-card-icon">🚻</div><div class="tip-card-title">Evita dati personali</div><div class="tip-card-desc">Nome, data di nascita, numero di telefono sono facilmente indovinabili.</div></div>
+            <div class="tip-card"><div class="tip-card-icon">🚶</div><div class="tip-card-title">Evita dati personali</div><div class="tip-card-desc">Nome, data di nascita, numero di telefono sono facilmente indovinabili.</div></div>
           </div>
         </div>
 
@@ -793,7 +831,7 @@ function checkPassword(pw){
 /* ===== QUIZ ===== */
 var quizData=[
   {q:'Qual è la password più sicura tra le seguenti?',opts:['password123','P@ssw0rd!2024#','mario1990','scuola'],correct:1,feedback:'Corretta! Una password lunga con simboli, numeri e maiuscole è la scelta migliore.'},
-  {q:"Ricevi un'email da «supporto@g00gle.com» che ti chiede di accedere al tuo account. Cosa fai?",opts:['Clicco subito sul link','Rispondo con le mie credenziali','Ignoro e vado direttamente su google.com','Inoltro a tutti gli amici'],correct:2,feedback:'Esatto! Non cliccare mai sui link nelle email sospette. Vai sempre direttamente al sito ufficiale.'},
+  {q:"Ricevi un'email da \u00absupporto@g00gle.com\u00bb che ti chiede di accedere al tuo account. Cosa fai?",opts:['Clicco subito sul link','Rispondo con le mie credenziali','Ignoro e vado direttamente su google.com','Inoltro a tutti gli amici'],correct:2,feedback:'Esatto! Non cliccare mai sui link nelle email sospette. Vai sempre direttamente al sito ufficiale.'},
   {q:'Cosa significa "2FA"?',opts:['2 fattori di attacco','Autenticazione a due fattori','2 file allegati','Second File Access'],correct:1,feedback:'Giusto! Il 2FA aggiunge un secondo livello di verifica oltre alla password.'},
   {q:'Su quale rete è più rischioso accedere al tuo account bancario?',opts:['Rete di casa','Wi-Fi scuola con password','Wi-Fi pubblico senza password','Rete mobile 4G'],correct:2,feedback:'Corretto! Le reti Wi-Fi pubbliche non cifrate possono essere intercettate.'},
   {q:'Quale strumento è consigliato per gestire password diverse per ogni sito?',opts:['Un foglio di carta','Lo stesso browser','Un password manager come Bitwarden','Un file .txt sul desktop'],correct:2,feedback:'Perfetto! Un password manager cifra e gestisce automaticamente credenziali uniche per ogni sito.'}
@@ -804,11 +842,11 @@ function renderQuestion(){
   var wrap=document.getElementById('quiz-wrap');
   if(!wrap)return;
   if(quizState.current>=quizData.length){
-    wrap.innerHTML='<div class="alert-box alert-success"><svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Quiz completato: '+quizState.score+' / '+quizData.length+' risposte corrette.</span></div>';
+    wrap.innerHTML='<div class="alert-box alert-success"><svg class="alert-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Quiz completato: '+quizState.score+' / '+quizData.length+' risposte corrette. <strong>+'+quizState.score*20+' XP</strong> guadagnati!</span></div>';
     return;
   }
   var item=quizData[quizState.current];
-  wrap.innerHTML='<div class="quiz-question">'+escHtml(item.q)+'</div><div class="quiz-options">'+item.opts.map(function(opt,i){return '<button type="button" class="quiz-opt" onclick="answerQuiz('+i+')">'+escHtml(opt)+'</button>';}).join('')+'</div><div class="quiz-feedback" id="quiz-feedback"></div>';
+  wrap.innerHTML='<div style="font-size:.72rem;color:var(--text-faint);margin-bottom:.25rem">Domanda '+(quizState.current+1)+' di '+quizData.length+'</div><div class="quiz-question">'+escHtml(item.q)+'</div><div class="quiz-options">'+item.opts.map(function(opt,i){return '<button type="button" class="quiz-opt" onclick="answerQuiz('+i+')">'+escHtml(opt)+'</button>';}).join('')+'</div><div class="quiz-feedback" id="quiz-feedback"></div>';
 }
 function answerQuiz(index){
   if(quizState.answered)return;
@@ -837,7 +875,7 @@ function showMsg(el,text,ok){
 /* ============================================================
    VAULT — collegato alle API reali (persistenza al logout)
    ============================================================ */
-var _vaultData = []; // cache locale dopo il caricamento
+var _vaultData = [];
 
 async function loadVault(){
   var list = document.getElementById('vaultList');
@@ -858,8 +896,6 @@ function renderVaultList(){
   var badge = document.getElementById('vaultCountBadge');
   var navBadge = document.getElementById('vaultNavBadge');
   var n = _vaultData.length;
-
-  // Aggiorna badge contatore
   if(n > 0){
     badge.textContent = n + ' credenzial' + (n===1?'e':'i');
     badge.style.display = '';
@@ -869,14 +905,12 @@ function renderVaultList(){
     badge.style.display = 'none';
     navBadge.style.display = 'none';
   }
-
   if(!n){
     list.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><p>Nessuna credenziale salvata</p></div>';
     return;
   }
-
   list.innerHTML = '<div class="vault-list">' + _vaultData.map(function(item){
-    var notesHtml = item.notes ? '<div class="vault-notes" title="'+escHtml(item.notes)+'">📝 '+escHtml(item.notes)+'</div>' : '';
+    var notesHtml = item.notes ? '<div class="vault-notes" title="'+escHtml(item.notes)+'">\ud83d\udcdd '+escHtml(item.notes)+'</div>' : '';
     return '<div class="vault-row" data-id="'+item.id+'">' +
       '<div style="display:flex;flex-direction:column;flex:1;min-width:0;gap:.1rem">' +
         '<div class="vault-row-site">'+escHtml(item.site_name)+'</div>' +
@@ -884,7 +918,7 @@ function renderVaultList(){
         notesHtml +
       '</div>' +
       '<div class="vault-pw-wrap">' +
-        '<span class="vault-pw-text" data-plain="'+escHtml(item.password_plain)+'">••••••••</span>' +
+        '<span class="vault-pw-text" data-plain="'+escHtml(item.password_plain)+'">\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022</span>' +
       '</div>' +
       '<div class="vault-actions">' +
         '<button type="button" class="btn btn-ghost btn-sm" onclick="toggleVaultPw(this)" aria-label="Mostra/nascondi password">Mostra</button>' +
@@ -898,7 +932,7 @@ function renderVaultList(){
 function toggleVaultPw(btn){
   var pwEl = btn.closest('.vault-row').querySelector('.vault-pw-text');
   var visible = btn.dataset.visible === '1';
-  pwEl.textContent = visible ? '••••••••' : pwEl.dataset.plain;
+  pwEl.textContent = visible ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : pwEl.dataset.plain;
   btn.textContent = visible ? 'Mostra' : 'Nascondi';
   btn.dataset.visible = visible ? '0' : '1';
 }
@@ -907,7 +941,7 @@ function copyVaultPw(btn){
   var pwEl = btn.closest('.vault-row').querySelector('.vault-pw-text');
   navigator.clipboard.writeText(pwEl.dataset.plain).then(function(){
     var orig = btn.textContent;
-    btn.textContent = '✓ Copiata';
+    btn.textContent = '\u2713 Copiata';
     setTimeout(function(){btn.textContent = orig;}, 1800);
   });
 }
@@ -940,7 +974,7 @@ async function generateVaultPw(mode){
       pwInput.value = d.password;
       pwInput.focus();
     }
-  } catch(e) { /* fallback silenzioso */ }
+  } catch(e) {}
   pwInput.placeholder = 'Password';
 }
 
@@ -1059,6 +1093,24 @@ async function deleteReport(id){
   loadAdminReports();
 }
 
+/* ===== NAV AVATAR INIT ===== */
+(async function initNavAvatar(){
+  const AVCOLS=[{bg:'#016469'},{bg:'#a12c7b'},{bg:'#3a7220'},{bg:'#b07d00'},{bg:'#006494'},{bg:'#7a39bb'},{bg:'#a13544'},{bg:'#555'}];
+  try{
+    const r=await fetch('api.php?action=profile_get',{headers:{Accept:'application/json'}});
+    const d=await r.json();
+    if(d.ok&&d.profile){
+      const p=d.profile;
+      const av=document.getElementById('navAvatar');
+      if(av){
+        const ini=(p.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        av.textContent=ini;
+        av.style.background=(AVCOLS[p.avatar_color||0]||AVCOLS[0]).bg;
+      }
+    }
+  }catch(e){}
+})();
+
 /* ===== FAB ===== */
 window.addEventListener('scroll',function(){
   document.getElementById('fabTop').classList.toggle('visible',window.scrollY>280);
@@ -1067,7 +1119,7 @@ window.addEventListener('scroll',function(){
 /* ===== INIT ===== */
 initQuiz();
 loadReports();
-loadVault(); // pre-carica vault in background per aggiornare il badge nella nav
+loadVault();
 </script>
 </body>
 </html>
