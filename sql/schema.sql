@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   name          VARCHAR(120)  NOT NULL,
   email         VARCHAR(190)  NOT NULL UNIQUE,
   password_hash VARCHAR(255)  NOT NULL,
-  role          ENUM('user','admin') NOT NULL DEFAULT 'user',
+  role          ENUM('user','admin','root') NOT NULL DEFAULT 'user',
   created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -39,3 +39,12 @@ CREATE TABLE IF NOT EXISTS vault_items (
   created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Utente root iniziale (email: root@itisff.it, password: admin1234)
+INSERT INTO users (name, email, password_hash, role)
+VALUES (
+  'Root SafeSchool',
+  'root@itisff.it',
+  '$2y$12$O0tQpgrcKFb.7vXtiOeJ9uquFasqxCZN3l3owwDYeP0m.0vIEspbC',
+  'root'
+);
