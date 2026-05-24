@@ -151,4 +151,404 @@ select.field-input{cursor:pointer}
 
 /* SECURITY SCORE */
 .score-wrap{display:flex;align-items:center;gap:1.25rem}
-.score-ring-w
+.score-ring-wrap{position:relative;width:76px;height:76px;flex-shrink:0}
+.score-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--primary) 0deg,var(--primary) 180deg,transparent 180deg,transparent 360deg);display:flex;align-items:center;justify-content:center}
+.score-ring-inner{width:58px;height:58px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:var(--shadow-sm)}
+.score-value{font-size:1.15rem;font-weight:700}
+.score-label{font-size:.7rem;color:var(--text-muted);margin-top:-2px}
+
+.score-bars{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+.score-bar-item{display:flex;flex-direction:column;gap:.15rem}
+.score-bar-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.score-bar-track{height:7px;border-radius:99px;background:var(--surface3);overflow:hidden}
+.score-bar-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--primary),var(--success))}
+.score-bar-val{font-size:.75rem;color:var(--text-faint)}
+
+/* STATS & BADGE */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:.3rem}
+.stat-pill{border-radius:var(--radius-lg);padding:.5rem .75rem;background:var(--surface2);border:1px solid var(--border2);display:flex;flex-direction:column;gap:.1rem}
+.stat-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.stat-value{font-size:.95rem;font-weight:600}
+.stat-note{font-size:.72rem;color:var(--text-faint)}
+
+.badges-grid{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.35rem}
+.badge-chip{display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;padding:.18rem .55rem;border-radius:99px;border:1px solid var(--border2);background:var(--surface2);color:var(--text-muted)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--primary)}
+
+/* LEADERBOARD */
+.leaderboard-list{display:flex;flex-direction:column;gap:.35rem;margin-top:.6rem}
+.lb-row{display:flex;align-items:center;gap:.45rem;padding:.3rem .45rem;border-radius:var(--radius);background:var(--surface2);border:1px solid transparent}
+.lb-row.me{border-color:var(--primary-light);background:var(--primary-bg)}
+.lb-rank{width:20px;font-size:.78rem;font-weight:600;color:var(--text-faint)}
+.lb-name{flex:1;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-xp{font-size:.78rem;color:var(--text-muted)}
+
+/* PROFILE FORM / PREFERENCES */
+.section{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.section-title{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted)}
+.section-desc{font-size:.8rem;color:var(--text-faint)}
+
+.actions-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
+
+/* FOOTER */
+.footer-note{font-size:.72rem;color:var(--text-faint);text-align:center;margin-top:.25rem}
+
+/* RESPONSIVE */
+@media (max-width:720px){
+  .profile-hero{flex-direction:column;align-items:flex-start}
+  .avatar-wrap{align-self:flex-start}
+  .score-wrap{flex-direction:column;align-items:flex-start}
+  .score-ring-wrap{margin-bottom:.4rem}
+}
+@media (max-width:520px){
+  .form-grid,.form-grid-3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="nav-top">
+    <a class="nav-brand" href="index.php">
+      <svg class="brand-icon" viewBox="0 0 32 32" aria-hidden="true">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#016469"/>
+            <stop offset="1" stop-color="#0b8793"/>
+          </linearGradient>
+        </defs>
+        <rect x="3" y="5" width="26" height="22" rx="7" fill="url(#g1)"/>
+        <path d="M10 15.5h12M10 19.5h7" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="11" cy="11" r="1.4" fill="#fff"/>
+      </svg>
+      <span>SafeSchool Hub</span>
+    </a>
+    <div class="nav-right">
+      <a class="btn btn-ghost btn-sm" href="index.php">Dashboard</a>
+      <a class="btn btn-ghost btn-sm" href="logout.php">Esci</a>
+    </div>
+  </div>
+</header>
+
+<main class="page-wrap" id="pageRoot" aria-live="polite">
+
+  <section class="card" id="profileCard" aria-busy="true">
+    <div class="profile-hero">
+      <div class="avatar-wrap">
+        <div class="avatar-circle" id="avatarCircle">
+          <span id="avatarInitials"><?= htmlspecialchars(mb_strtoupper(mb_substr($userName,0,2,'UTF-8'),'UTF-8')) ?></span>
+        </div>
+      </div>
+      <div class="profile-hero-info">
+        <div class="profile-name" id="profileName"><?= htmlspecialchars($userName) ?></div>
+        <div class="profile-role" id="profileRole">Caricamento ruolo…</div>
+        <div class="profile-joined" id="profileJoined">Caricamento dati profilo…</div>
+        <div class="profile-meta-chips">
+          <span class="meta-chip" id="metaClass">Classe/sezione: —</span>
+          <span class="meta-chip" id="metaReports">Segnalazioni: —</span>
+          <span class="meta-chip" id="metaVault">Credenziali salvate: —</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="score-wrap">
+        <div class="score-ring-wrap">
+          <div class="score-ring" id="scoreRing">
+            <div class="score-ring-inner">
+              <div class="score-value" id="scoreValue">0</div>
+              <div class="score-label">XP</div>
+            </div>
+          </div>
+        </div>
+        <div class="score-bars">
+          <div class="score-bar-item">
+            <div class="score-bar-label">Segnalazioni</div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="barReports" style="width:0%"></div></div>
+            <div class="score-bar-val" id="valReports">0 inviate</div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label">Vault</div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="barVault" style="width:0%"></div></div>
+            <div class="score-bar-val" id="valVault">0 credenziali</div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label">Quiz sicurezza</div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="barQuiz" style="width:0%"></div></div>
+            <div class="score-bar-val" id="valQuiz">Quiz non ancora svolto</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-pill">
+          <div class="stat-label">XP Totali</div>
+          <div class="stat-value" id="statXp">0</div>
+          <div class="stat-note">Si accumulano con segnalazioni e attività</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-label">Segnalazioni inviate</div>
+          <div class="stat-value" id="statReports">0</div>
+          <div class="stat-note">Più segnali, più punti</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-label">Credenziali nel vault</div>
+          <div class="stat-value" id="statVault">0</div>
+          <div class="stat-note">Solo tu puoi leggerle</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-label">Badge ottenuti</div>
+          <div class="stat-value" id="statBadges">0</div>
+          <div class="stat-note">Obiettivi di sicurezza raggiunti</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Badge di sicurezza</div>
+        <div class="section-desc">Ogni badge rappresenta un traguardo legato all'uso responsabile della piattaforma.</div>
+        <div class="badges-grid" id="badgesGrid"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Classifica XP</div>
+        <div class="section-desc">I primi 10 utenti (esclusi gli account ospite) ordinati per punti esperienza.</div>
+        <div class="leaderboard-list" id="leaderboardList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="secProfileEdit">
+    <div class="card-header">
+      <div class="card-header-icon">👤</div>
+      <h2 class="card-title" id="secProfileEdit">Dati profilo</h2>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-desc">Aggiorna i tuoi dati di contatto: verranno usati solo per migliorare l'esperienza sulla piattaforma.</div>
+      </div>
+      <form id="profileForm" autocomplete="off">
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="nameInput">Nome e cognome</label>
+            <input class="field-input" id="nameInput" name="name" type="text" maxlength="120" required>
+          </div>
+          <div class="field">
+            <label class="field-label" for="emailInput">Email (non modificabile)</label>
+            <input class="field-input" id="emailInput" type="email" readonly>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="classInput">Classe e sezione</label>
+            <input class="field-input" id="classInput" name="class_section" type="text" maxlength="50" placeholder="Es. 4^I INF">
+          </div>
+          <div class="field">
+            <label class="field-label" for="phoneInput">Telefono (opzionale)</label>
+            <input class="field-input" id="phoneInput" name="phone" type="text" maxlength="30" placeholder="Es. 333 1234567">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="bioInput">Breve descrizione</label>
+          <textarea class="field-input" id="bioInput" name="bio" rows="3" maxlength="200" placeholder="Chi sei, cosa studi, interessi…"></textarea>
+        </div>
+        <div class="actions-row">
+          <button type="submit" class="btn btn-primary btn-sm">Salva modifiche</button>
+          <span class="footer-note" id="profileSaveHint">Le modifiche sono salvate solo nel sistema scolastico.</span>
+        </div>
+        <div class="msg msg-ok" id="profileOk">Profilo aggiornato correttamente.</div>
+        <div class="msg msg-err" id="profileErr">Errore durante il salvataggio del profilo.</div>
+      </form>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="secSecurity">
+    <div class="card-header">
+      <div class="card-header-icon">🔒</div>
+      <h2 class="card-title" id="secSecurity">Sicurezza account</h2>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-desc">Cambia la tua password di accesso. Si consiglia di usare almeno 12 caratteri e di includere lettere, numeri e simboli.</div>
+      </div>
+      <form id="passwordForm" autocomplete="off">
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="oldPw">Password attuale</label>
+            <input class="field-input" id="oldPw" name="old_password" type="password" required>
+          </div>
+          <div class="field">
+            <label class="field-label" for="newPw">Nuova password</label>
+            <input class="field-input" id="newPw" name="new_password" type="password" required>
+          </div>
+        </div>
+        <div class="actions-row">
+          <button type="submit" class="btn btn-danger btn-sm">Aggiorna password</button>
+        </div>
+        <div class="msg msg-ok" id="pwOk">Password aggiornata correttamente.</div>
+        <div class="msg msg-err" id="pwErr">Errore durante l'aggiornamento della password.</div>
+      </form>
+
+      <div class="footer-note">Le credenziali nel vault restano cifrate anche se aggiorni la password di accesso.</div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  const $ = (sel) => document.querySelector(sel);
+  const page = $('#pageRoot');
+
+  async function loadProfile(){
+    try{
+      const res = await fetch('api.php?action=profile_get');
+      const data = await res.json();
+      if(!data.ok){
+        alert('Errore caricamento profilo: ' + (data.message || 'sconosciuto'));
+        return;
+      }
+      const p = data.profile;
+      const s = data.stats;
+      $('#profileRole').textContent = p.role === 'admin' ? 'Amministratore' : 'Studente';
+      $('#profileJoined').textContent = 'Iscritto dal ' + (p.created_at || '—');
+      $('#metaClass').textContent = 'Classe/sezione: ' + (p.class_section || '—');
+      $('#metaReports').textContent = 'Segnalazioni: ' + s.report_count;
+      $('#metaVault').textContent = 'Credenziali salvate: ' + s.vault_count;
+      $('#scoreValue').textContent = s.xp;
+      $('#statXp').textContent = s.xp;
+      $('#statReports').textContent = s.report_count;
+      $('#statVault').textContent = s.vault_count;
+      $('#statBadges').textContent = s.badge_count;
+      $('#valReports').textContent = s.report_count + ' inviate';
+      $('#valVault').textContent = s.vault_count + ' credenziali';
+      $('#valQuiz').textContent = s.quiz_score > 0 ? ('Punteggio quiz: ' + s.quiz_score + '/12') : 'Quiz non ancora svolto';
+      $('#barReports').style.width = Math.min(100, s.report_count * 10) + '%';
+      $('#barVault').style.width = Math.min(100, s.vault_count * 10) + '%';
+      $('#barQuiz').style.width = Math.min(100, s.quiz_score * 8) + '%';
+
+      const ring = $('#scoreRing');
+      const deg = Math.min(320, s.xp / 10 * 12);
+      ring.style.background = 'conic-gradient(var(--primary) 0deg, var(--primary) ' + deg + 'deg, rgba(0,0,0,0.08) ' + deg + 'deg, transparent 360deg)';
+
+      const nameInput = $('#nameInput');
+      const emailInput = $('#emailInput');
+      const classInput = $('#classInput');
+      const phoneInput = $('#phoneInput');
+      const bioInput = $('#bioInput');
+      nameInput.value = p.name || '';
+      emailInput.value = p.email || '';
+      classInput.value = p.class_section || '';
+      phoneInput.value = p.phone || '';
+      bioInput.value = p.bio || '';
+      $('#profileName').textContent = p.name || emailInput.value || 'Utente';
+
+      const badgesGrid = $('#badgesGrid');
+      badgesGrid.innerHTML = '';
+      (data.earned_badges || []).forEach(b => {
+        const el = document.createElement('div');
+        el.className = 'badge-chip';
+        const dot = document.createElement('span');
+        dot.className = 'badge-dot';
+        const label = document.createElement('span');
+        label.textContent = b.id.replace('_',' ');
+        el.appendChild(dot);
+        el.appendChild(label);
+        badgesGrid.appendChild(el);
+      });
+
+      const lbList = $('#leaderboardList');
+      lbList.innerHTML = '';
+      (data.leaderboard || []).forEach((row,idx) => {
+        const el = document.createElement('div');
+        el.className = 'lb-row' + (row.id === <?= (int)$userId ?> ? ' me' : '');
+        const rank = document.createElement('div');
+        rank.className = 'lb-rank';
+        rank.textContent = '#' + (idx+1);
+        const nm = document.createElement('div');
+        nm.className = 'lb-name';
+        nm.textContent = row.name || 'Utente';
+        const xp = document.createElement('div');
+        xp.className = 'lb-xp';
+        xp.textContent = row.xp + ' XP';
+        el.appendChild(rank); el.appendChild(nm); el.appendChild(xp);
+        lbList.appendChild(el);
+      });
+
+      document.getElementById('profileCard').setAttribute('aria-busy','false');
+    }catch(err){
+      alert('Errore di rete o parsing profilo: ' + err.message);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadProfile();
+
+    const profileForm = document.getElementById('profileForm');
+    const profileOk = document.getElementById('profileOk');
+    const profileErr = document.getElementById('profileErr');
+
+    profileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      profileOk.classList.remove('visible');
+      profileErr.classList.remove('visible');
+      const payload = {
+        name: document.getElementById('nameInput').value.trim(),
+        class_section: document.getElementById('classInput').value.trim(),
+        phone: document.getElementById('phoneInput').value.trim(),
+        bio: document.getElementById('bioInput').value.trim(),
+      };
+      try{
+        const res = await fetch('api.php?action=profile_update', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(data.ok){
+          profileOk.classList.add('visible');
+          document.getElementById('profileName').textContent = payload.name || document.getElementById('emailInput').value;
+          loadProfile();
+        } else {
+          profileErr.textContent = data.message || 'Errore durante il salvataggio del profilo.';
+          profileErr.classList.add('visible');
+        }
+      }catch(err){
+        profileErr.textContent = 'Errore di rete: ' + err.message;
+        profileErr.classList.add('visible');
+      }
+    });
+
+    const pwForm = document.getElementById('passwordForm');
+    const pwOk = document.getElementById('pwOk');
+    const pwErr = document.getElementById('pwErr');
+    pwForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      pwOk.classList.remove('visible');
+      pwErr.classList.remove('visible');
+      const payload = {
+        old_password: document.getElementById('oldPw').value,
+        new_password: document.getElementById('newPw').value,
+      };
+      try{
+        const res = await fetch('api.php?action=change_password', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(data.ok){
+          pwOk.classList.add('visible');
+          pwForm.reset();
+        } else {
+          pwErr.textContent = data.message || 'Errore durante l\'aggiornamento della password.';
+          pwErr.classList.add('visible');
+        }
+      }catch(err){
+        pwErr.textContent = 'Errore di rete: ' + err.message;
+        pwErr.classList.add('visible');
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
