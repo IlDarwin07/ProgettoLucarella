@@ -48,7 +48,6 @@ function ensure_user_columns(PDO $pdo): void {
 function award_badges(PDO $pdo, int $uid): array {
     // Dati freschi
     $u = $pdo->prepare('SELECT * FROM users WHERE id=?'); $u->execute([$uid]); $user=$u->fetch(PDO::FETCH_ASSOC);
-    $reportCount = (int)($pdo->prepare('SELECT COUNT(*) FROM reports WHERE user_id=?') && ($st=$pdo->prepare('SELECT COUNT(*) FROM reports WHERE user_id=?')) && $st->execute([$uid]) ? $st->fetchColumn() : 0);
     $st2=$pdo->prepare('SELECT COUNT(*) FROM reports WHERE user_id=?'); $st2->execute([$uid]); $reportCount=(int)$st2->fetchColumn();
     $st3=$pdo->prepare('SELECT COUNT(*) FROM vault_items WHERE user_id=?'); $st3->execute([$uid]); $vaultCount=(int)$st3->fetchColumn();
     // Earned badges gia' presenti
@@ -142,6 +141,9 @@ switch ($action) {
         if (!$name || !$email || !$password) {
             echo json_encode(['ok' => false, 'message' => 'Compila tutti i campi']); exit;
         }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['ok' => false, 'message' => 'Email non valida']); exit;
+        }
         if (strlen($password) < 8) {
             echo json_encode(['ok' => false, 'message' => 'Password troppo corta (min. 8 caratteri)']); exit;
         }
@@ -204,8 +206,12 @@ switch ($action) {
             echo json_encode(['ok' => false, 'message' => 'Non autorizzato']); exit;
         }
         $d = json_decode(file_get_contents('php://input'), true);
+        $validStatuses = ['Aperta', 'In revisione', 'Risolta', 'Chiusa'];
+        if (empty($d['id']) || empty($d['status']) || !in_array($d['status'], $validStatuses)) {
+            echo json_encode(['ok' => false, 'message' => 'Dati non validi']); exit;
+        }
         $pdo->prepare('UPDATE reports SET status = ? WHERE id = ?')
-            ->execute([$d['status'], $d['id']]);
+            ->execute([$d['status'], (int)$d['id']]);
         echo json_encode(['ok' => true]);
         break;
 
@@ -216,7 +222,10 @@ switch ($action) {
             echo json_encode(['ok' => false, 'message' => 'Non autorizzato']); exit;
         }
         $d = json_decode(file_get_contents('php://input'), true);
-        $pdo->prepare('DELETE FROM reports WHERE id = ?')->execute([$d['id']]);
+        if (empty($d['id'])) {
+            echo json_encode(['ok' => false, 'message' => 'ID mancante']); exit;
+        }
+        $pdo->prepare('DELETE FROM reports WHERE id = ?')->execute([(int)$d['id']]);
         echo json_encode(['ok' => true]);
         break;
 

@@ -130,8 +130,8 @@ document.getElementById('registerForm').addEventListener('submit', async functio
       })
     }).then(function(x){ return x.json(); });
     if(r.ok){
-      msg.innerHTML = '<div class="msg ok">Account creato! Reindirizzamento al login…</div>';
-      setTimeout(function(){ window.location.href = 'login.php'; }, 1000);
+      msg.innerHTML = '<div class="msg ok">Account creato! Reindirizzamento…</div>';
+      setTimeout(function(){ window.location.href = 'index.php'; }, 600);
     } else {
       msg.innerHTML = '<div class="msg err">' + (r.message || 'Errore nella registrazione') + '</div>';
       btn.disabled = false;
