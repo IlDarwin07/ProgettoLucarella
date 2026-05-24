@@ -1,12 +1,12 @@
 -- SafeSchool Hub — schema completo
--- root@itisff.it / admin1234  →  bcrypt cost=12
--- NOTA: password_enc cifrata con AES-256-CBC via vault_encrypt() in api.php
+-- Per creare l'utente admin dopo l'importazione, esegui:
+--   php -r "echo password_hash('LA_TUA_PASSWORD', PASSWORD_BCRYPT, ['cost'=>12]);"
+-- e inserisci manualmente l'hash nella tabella users.
 
-DROP DATABASE IF EXISTS safeschool_hub;
-CREATE DATABASE safeschool_hub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE safeschool_hub;
+CREATE DATABASE IF NOT EXISTS safeschool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE safeschool;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   name          VARCHAR(120)  NOT NULL,
   email         VARCHAR(190)  NOT NULL UNIQUE,
@@ -15,7 +15,7 @@ CREATE TABLE users (
   created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE reports (
+CREATE TABLE IF NOT EXISTS reports (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   user_id       INT NULL,
   name          VARCHAR(120)  NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE reports (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE vault_items (
+CREATE TABLE IF NOT EXISTS vault_items (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   user_id      INT NOT NULL,
   site_name    VARCHAR(120)  NOT NULL,
@@ -39,13 +39,3 @@ CREATE TABLE vault_items (
   created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Utente root predefinito
--- password: admin1234  →  bcrypt cost=12
--- Rigenera con: php -r "echo password_hash('admin1234', PASSWORD_BCRYPT, ['cost'=>12]);"
-INSERT INTO users (name, email, password_hash, role) VALUES (
-  'Root Administrator',
-  'root@itisff.it',
-  '$2y$12$YkaxOfsUVySKfniUCV0a4O7FQ8GPTJawpzOY6EI9GeBVP/b9tPzuu',
-  'admin'
-);
