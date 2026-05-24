@@ -3,19 +3,33 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/config.php';
 
 header('Content-Type: application/json');
+
+// Gestione globale degli errori: restituisce JSON invece di HTML
+set_exception_handler(function(Throwable $e) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'message' => 'Errore interno del server: ' . $e->getMessage()]);
+});
+set_error_handler(function(int $errno, string $errstr) {
+    throw new ErrorException($errstr, 0, $errno);
+});
+
 $action = $_GET['action'] ?? '';
 
 function vault_encrypt(string $plain): string {
     $iv = random_bytes(16);
     $enc = openssl_encrypt($plain, 'AES-256-CBC', VAULT_KEY, OPENSSL_RAW_DATA, $iv);
+    if ($enc === false) throw new RuntimeException('Cifratura vault fallita — chiave non valida (deve essere 32 byte)');
     return base64_encode($iv . $enc);
 }
 
 function vault_decrypt(string $enc): string {
-    $raw = base64_decode($enc);
-    $iv  = substr($raw, 0, 16);
-    $ct  = substr($raw, 16);
-    return openssl_decrypt($ct, 'AES-256-CBC', VAULT_KEY, OPENSSL_RAW_DATA, $iv);
+    if (empty($enc)) return '';
+    $raw = base64_decode($enc, true);
+    if ($raw === false || strlen($raw) < 17) return '(errore decodifica)';
+    $iv = substr($raw, 0, 16);
+    $ct = substr($raw, 16);
+    $result = openssl_decrypt($ct, 'AES-256-CBC', VAULT_KEY, OPENSSL_RAW_DATA, $iv);
+    return $result === false ? '(chiave vault non corrispondente)' : $result;
 }
 
 // Aggiunge colonne extra a users se non esistono (migrazione lazy)
@@ -67,9 +81,7 @@ function award_badges(PDO $pdo, int $uid): array {
             $newXP+=($xpMap[$bid]??0);
         }
     }
-    if($newXP>0){
-        $pdo->prepare('UPDATE users SET xp=xp+? WHERE id=?')->execute([$newXP,$uid]);
-    }
+    if($newXP>0) $pdo->prepare('UPDATE users SET xp=xp+? WHERE id=?')->execute([$newXP,$uid]);
     $stAll=$pdo->prepare('SELECT badge_id as id,earned_at FROM user_badges WHERE user_id=? ORDER BY earned_at ASC');
     $stAll->execute([$uid]);
     return $stAll->fetchAll(PDO::FETCH_ASSOC);
