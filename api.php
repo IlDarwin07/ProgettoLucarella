@@ -106,8 +106,7 @@ switch ($action) {
         $st->execute([$email]);
         $u = $st->fetch(PDO::FETCH_ASSOC);
         if (!$u || !password_verify($password, $u['password_hash'])) {
-            echo json_encode(['ok'=>false,'message'=>'Credenziali non valide']); exit;
-        }
+            echo json_encode(['ok'=>false,'message'=>'Credenziali non valide']); exit; }
         if (password_needs_rehash($u['password_hash'], PASSWORD_BCRYPT, ['cost'=>12])) {
             $pdo->prepare('UPDATE users SET password_hash=? WHERE id=?')->execute([password_hash($password,PASSWORD_BCRYPT,['cost'=>12]),$u['id']]);
         }
@@ -128,10 +127,16 @@ switch ($action) {
         $chk = $pdo->prepare('SELECT id FROM users WHERE email=?'); $chk->execute([$email]);
         if ($chk->fetch()) { echo json_encode(['ok'=>false,'message'=>'Email già registrata']); exit; }
         $hash = password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]);
+
+        // Se è il primo utente nel sistema, promuovilo a admin
+        $countStmt = $pdo->query('SELECT COUNT(*) FROM users');
+        $userCount = (int)$countStmt->fetchColumn();
+        $role = $userCount === 0 ? 'admin' : 'user';
+
         $st = $pdo->prepare('INSERT INTO users (name,email,password_hash,role) VALUES (?,?,?,?)');
-        $st->execute([$name,$email,$hash,'user']);
+        $st->execute([$name,$email,$hash,$role]);
         $id = $pdo->lastInsertId();
-        $_SESSION['user'] = ['id'=>$id,'name'=>$name,'email'=>$email,'role'=>'user'];
+        $_SESSION['user'] = ['id'=>$id,'name'=>$name,'email'=>$email,'role'=>$role];
         echo json_encode(['ok'=>true,'user'=>$_SESSION['user']]);
         break;
 
