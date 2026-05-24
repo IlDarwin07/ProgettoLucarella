@@ -4,7 +4,6 @@ require_once __DIR__ . '/includes/config.php';
 
 header('Content-Type: application/json');
 
-// Gestione globale degli errori: restituisce JSON invece di HTML
 set_exception_handler(function(Throwable $e) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'message' => 'Errore interno del server: ' . $e->getMessage()]);
@@ -32,7 +31,6 @@ function vault_decrypt(string $enc): string {
     return $result === false ? '(chiave vault non corrispondente)' : $result;
 }
 
-// Aggiunge colonne extra a users se non esistono (migrazione lazy)
 function ensure_user_columns(PDO $pdo): void {
     $cols = ['class_section VARCHAR(50) DEFAULT NULL',
              'phone VARCHAR(30) DEFAULT NULL',
@@ -43,7 +41,7 @@ function ensure_user_columns(PDO $pdo): void {
              'last_login DATE DEFAULT NULL',
              'created_at DATETIME DEFAULT CURRENT_TIMESTAMP'];
     foreach ($cols as $def) {
-        try { $pdo->exec("ALTER TABLE users ADD COLUMN $def"); } catch (\Throwable $e) { /* gia' esiste */ }
+        try { $pdo->exec("ALTER TABLE users ADD COLUMN $def"); } catch (\Throwable $e) { }
     }
     $pdo->exec("CREATE TABLE IF NOT EXISTS user_badges (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -294,6 +292,71 @@ switch ($action) {
         $row=$st->fetch(PDO::FETCH_ASSOC);
         if(!$row||!password_verify($oldPw,$row['password_hash'])){ echo json_encode(['ok'=>false,'message'=>'Password attuale errata']); exit; }
         $pdo->prepare('UPDATE users SET password_hash=? WHERE id=?')->execute([password_hash($newPw,PASSWORD_BCRYPT,['cost'=>12]),$uid]);
+        echo json_encode(['ok'=>true]);
+        break;
+
+    // =========================================================
+    // ROOT-ONLY: gestione utenti
+    // =========================================================
+
+    case 'root_users_list':
+        // Solo l'account con id=1 (root) puo' accedere
+        if (($_SESSION['user']['id'] ?? null) != 1) {
+            http_response_code(403);
+            echo json_encode(['ok'=>false,'message'=>'Accesso riservato all\'account root']);
+            exit;
+        }
+        ensure_user_columns($pdo);
+        $st = $pdo->query(
+            'SELECT u.id, u.name, u.email, u.role, u.class_section, u.phone, u.bio,
+                    u.xp, u.quiz_score, u.last_login, u.created_at,
+                    (SELECT COUNT(*) FROM reports r WHERE r.user_id = u.id) AS report_count,
+                    (SELECT COUNT(*) FROM vault_items v WHERE v.user_id = u.id) AS vault_count,
+                    (SELECT COUNT(*) FROM user_badges b WHERE b.user_id = u.id) AS badge_count
+             FROM users u
+             ORDER BY u.id ASC'
+        );
+        echo json_encode(['ok'=>true,'users'=>$st->fetchAll(PDO::FETCH_ASSOC)]);
+        break;
+
+    case 'root_set_role':
+        // Solo root puo' cambiare il ruolo
+        if (($_SESSION['user']['id'] ?? null) != 1) {
+            http_response_code(403);
+            echo json_encode(['ok'=>false,'message'=>'Accesso riservato all\'account root']);
+            exit;
+        }
+        $d = json_decode(file_get_contents('php://input'), true);
+        $targetId = (int)($d['user_id'] ?? 0);
+        $newRole  = $d['role'] ?? '';
+        if (!$targetId || !in_array($newRole, ['user','admin'])) {
+            echo json_encode(['ok'=>false,'message'=>'Parametri non validi']);
+            exit;
+        }
+        if ($targetId === 1) {
+            echo json_encode(['ok'=>false,'message'=>'Non puoi modificare il ruolo dell\'account root']);
+            exit;
+        }
+        $pdo->prepare('UPDATE users SET role=? WHERE id=?')->execute([$newRole, $targetId]);
+        echo json_encode(['ok'=>true,'user_id'=>$targetId,'new_role'=>$newRole]);
+        break;
+
+    case 'root_delete_user':
+        if (($_SESSION['user']['id'] ?? null) != 1) {
+            http_response_code(403);
+            echo json_encode(['ok'=>false,'message'=>'Accesso riservato all\'account root']);
+            exit;
+        }
+        $d = json_decode(file_get_contents('php://input'), true);
+        $targetId = (int)($d['user_id'] ?? 0);
+        if (!$targetId || $targetId === 1) {
+            echo json_encode(['ok'=>false,'message'=>'ID non valido o tentativo di eliminare root']);
+            exit;
+        }
+        $pdo->prepare('DELETE FROM user_badges WHERE user_id=?')->execute([$targetId]);
+        $pdo->prepare('DELETE FROM vault_items  WHERE user_id=?')->execute([$targetId]);
+        $pdo->prepare('DELETE FROM reports      WHERE user_id=?')->execute([$targetId]);
+        $pdo->prepare('DELETE FROM users        WHERE id=?')->execute([$targetId]);
         echo json_encode(['ok'=>true]);
         break;
 
